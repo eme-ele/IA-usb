@@ -67,19 +67,37 @@ int dot_product(Pair value, vector<double>& weights){
 }
 
 int main(int argc, char ** argv){
+ if (argc != 3) {
+    cerr << "Uso: ./perceptron [num_entradas] -[or|and|xor]" << endl;
+    exit(-1);
+  }
+
   int n = atoi(argv[1]);
+  if (n < 0){
+    cerr << "Uso: ./perceptron [num_entradas] -[or|and|xor]" << endl;
+    exit(-1);
+  }
+
   double learning_rate = 0.01;
   double threshold = 0.5;
-  vector<double> weights(n);
   vector<Pair> values(4);
   vector<int> output(4);
-
+  vector<double> weights(n);
   int error_count;
   double error;
   int result;
 
-  load_and(values, output);
-  
+  if (strcmp(argv[2],"-or")==0){
+    load_or(values,output);
+  } else if (strcmp(argv[2],"-and")==0) {
+    load_and(values,output);
+  } else if (strcmp(argv[2],"-xor")==0) {
+    load_xor(values,output);
+  } else {
+    cerr << "Uso: ./perceptron [num_entradas] -[or|and|xor]" << endl;
+    exit(-1);
+  }
+
   while(1){
     error_count = 0;
     for(int i=0; i < values.size(); i++){
@@ -95,8 +113,6 @@ int main(int argc, char ** argv){
     if (error_count == 0) {
       break;
     }
-
   }
-//  print(weights);
 }
 
