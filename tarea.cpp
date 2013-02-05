@@ -1,7 +1,7 @@
 #include <vector>
 #include <stdlib.h>
 #include <iostream>
-
+#include <stdlib.h>
 
 using namespace std;
 
@@ -9,6 +9,7 @@ struct Pair {
   int v1;
   int v2;
 };
+
 typedef struct Pair Pair;
 
 int load_or(vector<Pair>& values, vector<int>& output){
@@ -21,7 +22,7 @@ int load_or(vector<Pair>& values, vector<int>& output){
   values[2] = c; output[2] = 1;
   d.v1 = 1; d.v2 = 1;
   values[3] = d; output[3] = 1;
-  return 0;
+  return 1;
 }
 
 int load_and(vector<Pair>& values, vector<int>& output){
@@ -34,7 +35,7 @@ int load_and(vector<Pair>& values, vector<int>& output){
   values[2] = c; output[2] = 0;
   d.v1 = 1; d.v2 = 1;
   values[3] = d; output[3] = 1;
-  return 0;
+  return 1;
 }
 
 int load_xor(vector<Pair>& values, vector<int>& output){
@@ -47,7 +48,7 @@ int load_xor(vector<Pair>& values, vector<int>& output){
   values[2] = c; output[2] = 1;
   d.v1 = 1; d.v2 = 1;
   values[3] = d; output[3] = 0;
-  return 0;
+  return 1;
 }
 
 int print(vector<double>& weights){
@@ -66,38 +67,12 @@ int dot_product(Pair value, vector<double>& weights){
   return sum;
 }
 
-int main(int argc, char ** argv){
- if (argc != 3) {
-    cerr << "Uso: ./perceptron [num_entradas] -[or|and|xor]" << endl;
-    exit(-1);
-  }
-
-  int n = atoi(argv[1]);
-  if (n < 0){
-    cerr << "Uso: ./perceptron [num_entradas] -[or|and|xor]" << endl;
-    exit(-1);
-  }
-
-  double learning_rate = 0.01;
-  double threshold = 0.5;
-  vector<Pair> values(4);
-  vector<int> output(4);
-  vector<double> weights(n);
+int perceptron(int n, double threshold, double learning_rate, vector<Pair>& values, vector<int>& output){
+  cout << "perceptron..." << endl;
+  vector<double> weights(n);  
   int error_count;
   double error;
   int result;
-
-  if (strcmp(argv[2],"-or")==0){
-    load_or(values,output);
-  } else if (strcmp(argv[2],"-and")==0) {
-    load_and(values,output);
-  } else if (strcmp(argv[2],"-xor")==0) {
-    load_xor(values,output);
-  } else {
-    cerr << "Uso: ./perceptron [num_entradas] -[or|and|xor]" << endl;
-    exit(-1);
-  }
-
   while(1){
     error_count = 0;
     for(int i=0; i < values.size(); i++){
@@ -111,8 +86,47 @@ int main(int argc, char ** argv){
       }
     }
     if (error_count == 0) {
-      break;
+      return 1;
     }
   }
+}
+
+int adaline(){
+  return 1;
+}
+
+int imprimir_uso(){
+  cerr << "Uso: ./tarea -[p|a] [num_entradas] -[or|and|xor]" << endl;
+  return 1;
+}
+
+
+int main(int argc, char ** argv){
+  vector<Pair> values(4);
+  vector<int> output(4);
+ 
+  if (argc != 4) {
+    imprimir_uso();
+    return -1;
+  }
+  int n = atoi(argv[2]);
+
+  if (strcmp(argv[3],"-or")==0){
+    load_or(values,output);
+  } else if (strcmp(argv[3],"-and")==0) {
+    load_and(values,output);
+  } else if (strcmp(argv[3],"-xor")==0) {
+    load_xor(values,output);
+  } else {
+    imprimir_uso();
+    return -1;
+  }
+
+  if (strcmp(argv[1], "-a")==0){
+    adaline();
+  } else if (strcmp(argv[1], "-p")==0){
+    perceptron(n, 0.5, 0.01, values, output);
+  }
+
 }
 
