@@ -59,14 +59,6 @@ int load_xor(vector<vector<int> >& values, vector<double>& output){
 	return 1;
 }
 
-int fill_example(vector<string>& tokens, vector<int>& x){
-	for (int i=0; i < 5; i++){
-		stringstream ss(tokens[i]);
-		ss >> x[i];
-	}
-	return 1;
-}
-
 int print(vector<double>& weights){
 	for (int i=0; i < weights.size(); i++){
 		cout << weights[i] << " ";
@@ -96,43 +88,58 @@ int print_values(vector<vector<int> >& values){
 
 int load_bupa(vector<vector<int> >& train, vector<vector<int> >&  test, 
 				vector<double>& out_test, vector<double>& out_train, string filename){
-	ifstream myfile;
-	string line, word;
-	vector<string> tokens(7);
+	ifstream myfile (filename.c_str());
+	string line;
+	string token;
+	double matrix[345][7];
 	int i = 0;
-	int k = 0;
-	double out;
-
-	myfile.open(filename.c_str());	
+	int j = 0;
+	int train_i = 0;
+	int test_i = 0;
 	if (myfile.is_open()){
-		while (myfile.good()){
-			getline(myfile, line);
-			vector<int> x(5);			
-			stringstream line_ss(line);			
-			for(int j=0; j<7; j++){
-				getline(line_ss, tokens[j], ',');
+		while(myfile.good()){
+			getline(myfile,line);
+			stringstream sLinea(line);
+			j=0;
+			while(getline(sLinea, token, ',')){
+				stringstream valor(token);
+				valor >> matrix[i][j];
+				
+				j++;
 			}
-			stringstream ss(tokens[5]);
-			ss >> out;
-			if (strcmp(tokens[6].c_str(),"1")==0) {
-				fill_example(tokens, x);
-				train[i] = x; 
-				out_train[i] = out;
-				i++;
-			} else if (strcmp(tokens[6].c_str(),"2")==0) {
-				fill_example(tokens, x);
-				test[k] = x;
-				out_test[k] = out;
-				k++;
+			i++;
+		}		
+		for(i=0; i<345;i++){
+			vector<int> x(5);
+			vector<int> y(5);
+			
+			if(matrix[i][6]==2){
+				for(j=0; j<5; j++){
+					y[j] = int(matrix[i][j]);
+				}
+				test[test_i] = y;
+				out_test[test_i] = matrix[i][5];
+				test_i++;
 			}
+			if(matrix[i][6]== 1){
+				for(j=0; j<5; j++){
+					x[j] = int(matrix[i][j]);
+				}
+				train[train_i] = x;
+				out_train[train_i] = matrix[i][5];
+				train_i++;
+			}
+			
+
 		}
-		print_values(test);
-		myfile.close();
-		return 1;
-	}
-	else {
+
+	} else {
+		// si no pudo abrir archivo
 		return -1;
-	}		
+	}
+	print_values(test);
+	myfile.close();
+	return 1;
 }
 
 double dot_product(vector<int> value, vector<double>& weights){
