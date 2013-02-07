@@ -3,6 +3,10 @@
 #include <iostream>
 #include <stdlib.h>
 #include <math.h>
+#include <sstream>
+#include <string>
+#include <fstream>
+
 
 using namespace std;
 
@@ -55,12 +59,80 @@ int load_xor(vector<vector<int> >& values, vector<double>& output){
 	return 1;
 }
 
+int fill_example(vector<string>& tokens, vector<int>& x){
+	for (int i=0; i < 5; i++){
+		stringstream ss(tokens[i]);
+		ss >> x[i];
+	}
+	return 1;
+}
+
 int print(vector<double>& weights){
 	for (int i=0; i < weights.size(); i++){
 		cout << weights[i] << " ";
 	}
 	cout << endl;
 	return 1;
+}
+
+int print_int(vector<int>& weights){
+	for (int i=0; i < weights.size(); i++){
+		cout << weights[i] << " ";
+	}
+	cout << endl;
+	return 1;
+}
+
+int print_values(vector<vector<int> >& values){
+	for (int i=0; i < values.size(); i++){
+		cout << i << ": ";
+		for (int j=0; j < values[i].size(); j++)
+			cout << values[i][j] << " ";
+	cout << endl;
+	}
+	return 1;
+}
+
+
+int load_bupa(vector<vector<int> >& train, vector<vector<int> >&  test, 
+				vector<double>& out_test, vector<double>& out_train, string filename){
+	ifstream myfile;
+	string line, word;
+	vector<string> tokens(7);
+	int i = 0;
+	int k = 0;
+	double out;
+
+	myfile.open(filename.c_str());	
+	if (myfile.is_open()){
+		while (myfile.good()){
+			getline(myfile, line);
+			vector<int> x(5);			
+			stringstream line_ss(line);			
+			for(int j=0; j<7; j++){
+				getline(line_ss, tokens[j], ',');
+			}
+			stringstream ss(tokens[5]);
+			ss >> out;
+			if (strcmp(tokens[6].c_str(),"1")==0) {
+				fill_example(tokens, x);
+				train[i] = x; 
+				out_train[i] = out;
+				i++;
+			} else if (strcmp(tokens[6].c_str(),"2")==0) {
+				fill_example(tokens, x);
+				test[k] = x;
+				out_test[k] = out;
+				k++;
+			}
+		}
+		print_values(test);
+		myfile.close();
+		return 1;
+	}
+	else {
+		return -1;
+	}		
 }
 
 double dot_product(vector<int> value, vector<double>& weights){
@@ -114,7 +186,6 @@ int adaline(int n, double learning_rate, vector<vector<int> >& values, vector<do
 	// store results
 	int num_it;
 	vector<double> final_weights(weights);
-	vector<double> final_result(result);
 	
 	for(int x=0; x<1000;x++){
 		error_count = 0;
@@ -145,7 +216,7 @@ int adaline(int n, double learning_rate, vector<vector<int> >& values, vector<do
 }
 
 int imprimir_uso(){
-	cerr << "Uso: ./tarea -[p | a] -[or | and | xor]" << endl;
+	cerr << "Uso: ./tarea -[p | a] -[or | and | xor | liv]" << endl;
 	return 1;
 }
 
@@ -153,6 +224,10 @@ int imprimir_uso(){
 int main(int argc, char ** argv){
 	vector<vector<int> > values(4);
 	vector<double> output(4);
+	vector<vector<int> > train(145);
+	vector<double> out_train(145);	
+	vector<vector<int> > test(200);
+	vector<double> out_test(200);
  
 	if (argc != 3) {
 		imprimir_uso();
@@ -165,15 +240,28 @@ int main(int argc, char ** argv){
 		load_and(values,output);
 	} else if (strcmp(argv[2],"-xor")==0) {
 		load_xor(values,output);
+	} else if (strcmp(argv[2],"-liv")==0){
+		if (load_bupa(train, test, out_train, out_test, "bupa.data") < 0){
+			cerr << "error cargando el archivo bupa.data" << endl;
+			return -1;
+		}
 	} else {
 		imprimir_uso();
 		return -1;
 	}
 
-	if (strcmp(argv[1], "-a")==0){
+	if (strcmp(argv[1], "-a")==0 and strcmp(argv[2], "-liv")!=0){
 		adaline(2, 0.01, values, output);
-	} else if (strcmp(argv[1], "-p")==0){
+	} else if (strcmp(argv[1], "-a")==0 and strcmp(argv[2], "-liv")==0){
+		cout << "adaline .." << endl;
+		adaline(5, 0.01, train, out_train);
+		cout << "adaline2 .." << endl;
+		adaline(5, 0.01, test, out_test);
+	} else if (strcmp(argv[1], "-p")==0 and strcmp(argv[2],"-liv") != 0){
 		perceptron(2, 0.5, 0.01, values, output);
+	} else {
+		imprimir_uso();
+		return -1;
 	}
 
 }
