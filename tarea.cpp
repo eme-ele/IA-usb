@@ -11,11 +11,11 @@
 using namespace std;
 
 
-int load_or(vector<vector<int> >& values, vector<double>& output){
-	vector<int> a(2);
-	vector<int> b(2);
-	vector<int> c(2);
-	vector<int> d(2);
+int load_or(vector<vector<double> >& values, vector<double>& output){
+	vector<double> a(2);
+	vector<double> b(2);
+	vector<double> c(2);
+	vector<double> d(2);
 	a[0] = 0; a[1] = 0;
 	values[0] = a; output[0] = 0;
 	b[0] = 0; b[1] = 1;
@@ -27,11 +27,11 @@ int load_or(vector<vector<int> >& values, vector<double>& output){
 	return 1;
 }
 
-int load_and(vector<vector<int> >& values, vector<double>& output){
-	vector<int> a(2);
-	vector<int> b(2);
-	vector<int> c(2);
-	vector<int> d(2);
+int load_and(vector<vector<double> >& values, vector<double>& output){
+	vector<double> a(2);
+	vector<double> b(2);
+	vector<double> c(2);
+	vector<double> d(2);
 	a[0] = 0; a[1] = 0;
 	values[0] = a; output[0] = 0;	
 	b[0] = 0; b[1] = 1; 
@@ -43,11 +43,11 @@ int load_and(vector<vector<int> >& values, vector<double>& output){
 	return 1;
 }
 
-int load_xor(vector<vector<int> >& values, vector<double>& output){
-	vector<int> a(2);
-	vector<int> b(2);
-	vector<int> c(2);
-	vector<int> d(2);
+int load_xor(vector<vector<double> >& values, vector<double>& output){
+	vector<double> a(2);
+	vector<double> b(2);
+	vector<double> c(2);
+	vector<double> d(2);
 	a[0] = 0; a[1] = 0;
 	values[0] = a; output[0] = 0;
 	b[0] = 0; b[1] = 1;
@@ -67,7 +67,7 @@ int print(vector<double>& weights){
 	return 1;
 }
 
-int print_int(vector<int>& weights){
+int print_int(vector<double>& weights){
 	for (int i=0; i < weights.size(); i++){
 		cout << weights[i] << " ";
 	}
@@ -75,7 +75,7 @@ int print_int(vector<int>& weights){
 	return 1;
 }
 
-int print_values(vector<vector<int> >& values){
+int print_values(vector<vector<double> >& values){
 	for (int i=0; i < values.size(); i++){
 		cout << i << ": ";
 		for (int j=0; j < values[i].size(); j++)
@@ -86,16 +86,13 @@ int print_values(vector<vector<int> >& values){
 }
 
 
-int load_bupa(vector<vector<int> >& train, vector<vector<int> >&  test, 
-				vector<double>& out_test, vector<double>& out_train, string filename){
+int load_bupa(vector<vector<double> >& values, vector<double>& out, string filename){
 	ifstream myfile (filename.c_str());
 	string line;
 	string token;
 	double matrix[345][7];
 	int i = 0;
 	int j = 0;
-	int train_i = 0;
-	int test_i = 0;
 	if (myfile.is_open()){
 		while(myfile.good()){
 			getline(myfile,line);
@@ -109,47 +106,40 @@ int load_bupa(vector<vector<int> >& train, vector<vector<int> >&  test,
 			}
 			i++;
 		}		
-		for(i=0; i<345;i++){
-			vector<int> x(5);
-			vector<int> y(5);
-			
-			if(matrix[i][6]==2){
-				for(j=0; j<5; j++){
-					y[j] = int(matrix[i][j]);
-				}
-				test[test_i] = y;
-				out_test[test_i] = matrix[i][5];
-				test_i++;
+		for(i=0; i<145;i++){
+			vector<double> x(6);
+			for(j=0; j<6; j++){
+				x[j] = matrix[i][j];
 			}
-			if(matrix[i][6]== 1){
-				for(j=0; j<5; j++){
-					x[j] = int(matrix[i][j]);
-				}
-				train[train_i] = x;
-				out_train[train_i] = matrix[i][5];
-				train_i++;
-			}
-			
-
+			values[i] = x;
+			out[i] = matrix[i][6];
 		}
+		
 
 	} else {
 		// si no pudo abrir archivo
 		return -1;
 	}
-	print_values(test);
+	
+	print_values(values);
+	print(out);
 	myfile.close();
 	return 1;
 }
 
-double dot_product(vector<int> value, vector<double>& weights){
-	double sum; 
-	sum = value[0] * weights[0];
-	sum = sum + value[1] * weights[1];
+double dot_product(vector<double> value, vector<double>& weights){
+	double sum = 0; 
+	//print(value);
+	//print(weights);
+	for(int i=0; i < value.size();i++){
+		sum = sum + value[i] * weights[i];
+	}
+	//cout << "SUMA " << sum << endl;
+	//exit(-1);
 	return sum;
 }
 
-int perceptron(int n, double threshold, double learning_rate, vector<vector<int> >& values, vector<double>& output){
+int perceptron(int n, double threshold, double learning_rate, vector<vector<double> >& values, vector<double>& output){
 	vector<double> weights(n);	
 	int error_count;
 	double error;
@@ -179,41 +169,57 @@ double error_cuadrado(vector<double>& o, vector<double>& t){
 		sum = sum + pow((t[i] - o[i]),2);
 		
 	}
+	//cout << sum << endl;
 	return sum/2;
 	
 }
 
-int adaline(int n, double learning_rate, vector<vector<int> >& values, vector<double>& output){
+int adaline(int n, double learning_rate, vector<vector<double> >& values, vector<double>& output){
 	vector<double> weights(n);
+	//for(int z=0; z< weights.size();z++ ){
+	//	weights[z]= (rand() /(double) RAND_MAX);
+	//}
+	print(weights);
 	vector<double> grad_weights(n);
+	
 	double error_count;
 	double error;
 	double min_error = 1000;
 	vector<double> result(values.size());
 	// store results
 	int num_it;
+	int x;
 	vector<double> final_weights(weights);
-	
-	for(int x=0; x<1000;x++){
+	for(x=0; x<24;x++){
+		//print(weights);
 		error_count = 0;
 		for(int i=0; i < values.size(); i++){
 			//print(weights);
+			//cout << "values[i]" << endl;
 			result[i] = dot_product(values[i], weights);
 			error = output[i] - result[i];
+			//cout << "Error   " << error << endl;
 			for(int j=0; j<grad_weights.size(); j++){
-				grad_weights[j] = grad_weights[j] + learning_rate * error * values[i][j];
+				double nuevoVar = learning_rate * error * values[i][j];
+				grad_weights[j] = grad_weights[j] + nuevoVar;
+				cout << "variacion " << nuevoVar;
 			}
 		}
 		for (int k=0; k<weights.size(); k++){
 			weights[k] = weights[k] + grad_weights[k];
 		}
+
 		error_count = error_cuadrado(result,output);
-	
+		//cout << error_count << endl;
 		// si encuentro un peso menor
+		cout << "ERROR COUNT    " << error_count << endl;
 		if (error_count < min_error) {
 			num_it = x;
 			final_weights = weights;
 			min_error = error_count;
+		}
+		if(error_count < 0){
+			break;
 		}
 	}
 	cout << "Iteraciones: " << num_it << " Error Minimo: " << min_error << endl;
@@ -229,12 +235,10 @@ int imprimir_uso(){
 
 
 int main(int argc, char ** argv){
-	vector<vector<int> > values(4);
+	vector<vector<double> > values(4);
 	vector<double> output(4);
-	vector<vector<int> > train(145);
-	vector<double> out_train(145);	
-	vector<vector<int> > test(200);
-	vector<double> out_test(200);
+	vector<vector<double> > in(145);
+	vector<double> out(145);	
  
 	if (argc != 3) {
 		imprimir_uso();
@@ -248,7 +252,7 @@ int main(int argc, char ** argv){
 	} else if (strcmp(argv[2],"-xor")==0) {
 		load_xor(values,output);
 	} else if (strcmp(argv[2],"-liv")==0){
-		if (load_bupa(train, test, out_train, out_test, "bupa.data") < 0){
+		if (load_bupa(in, out, "bupa.data") < 0){
 			cerr << "error cargando el archivo bupa.data" << endl;
 			return -1;
 		}
@@ -260,10 +264,11 @@ int main(int argc, char ** argv){
 	if (strcmp(argv[1], "-a")==0 and strcmp(argv[2], "-liv")!=0){
 		adaline(2, 0.01, values, output);
 	} else if (strcmp(argv[1], "-a")==0 and strcmp(argv[2], "-liv")==0){
-		cout << "adaline .." << endl;
-		adaline(5, 0.01, train, out_train);
+		//cout << "adaline .." << endl;
+		//adaline(5, 0.01, train, out_train);
 		cout << "adaline2 .." << endl;
-		adaline(5, 0.01, test, out_test);
+		adaline(6, 0.001, in, out);
+		
 	} else if (strcmp(argv[1], "-p")==0 and strcmp(argv[2],"-liv") != 0){
 		perceptron(2, 0.5, 0.01, values, output);
 	} else {
