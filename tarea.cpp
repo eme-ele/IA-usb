@@ -10,7 +10,6 @@
 
 using namespace std;
 
-
 int load_or(vector<vector<double> >& values, vector<double>& output){
 	vector<double> a(2);
 	vector<double> b(2);
@@ -106,7 +105,7 @@ int load_bupa(vector<vector<double> >& values, vector<double>& out, string filen
 			}
 			i++;
 		}		
-		for(i=0; i<145;i++){
+		for(i=0; i<345;i++){
 			vector<double> x(6);
 			for(j=0; j<6; j++){
 				x[j] = matrix[i][j];
@@ -119,8 +118,7 @@ int load_bupa(vector<vector<double> >& values, vector<double>& out, string filen
 	} else {
 		// si no pudo abrir archivo
 		return -1;
-	}
-	
+	}	
 	//print_values(values);
 	//print(out);
 	myfile.close();
@@ -129,22 +127,19 @@ int load_bupa(vector<vector<double> >& values, vector<double>& out, string filen
 
 double dot_product(vector<double> value, vector<double>& weights){
 	double sum = 0; 
-	//print(value);
-	//print(weights);
 	for(int i=0; i < value.size();i++){
 		sum = sum + value[i] * weights[i];
 	}
-	//cout << "SUMA " << sum << endl;
-	//exit(-1);
 	return sum;
 }
 
-int perceptron(int n, double threshold, double learning_rate, vector<vector<double> >& values, vector<double>& output){
+int perceptron(int n, double threshold, double learning_rate, vector<vector<double> >& values, 
+				vector<double>& output, int num_it){
 	vector<double> weights(n);	
 	int error_count;
 	double error;
 	int result;
-	for(int t=0;t<1000;t++){
+	for(int t=0;t<num_it;t++){
 		error_count = 0;
 		for(int i=0; i < values.size(); i++){
 			print(weights);
@@ -169,84 +164,75 @@ double error_cuadrado(vector<double>& o, vector<double>& t){
 		sum = sum + pow((t[i] - o[i]),2);
 		
 	}
-	//cout << sum << endl;
-	return sum/2;
-	
+	return sum/2;	
 }
 
-int adaline(int n, double learning_rate, vector<vector<double> >& values, vector<double>& output){
-	vector<double> weights(n);
-	//for(int z=0; z< weights.size();z++ ){
-	//	weights[z]= (rand() /(double) RAND_MAX);
-	//}
-	//print(weights);
-	vector<double> grad_weights(n);
-	
+int adaline(int n, double learning_rate, vector<vector<double> >& values, vector<double>& output, 
+			vector<vector<double> >& final_weights, int size){
+	int num_it = final_weights.size();
+	vector<double> grad_weights(n);	
 	double error_count;
 	double error;
-	double min_error = 1000;
-	vector<double> result(values.size());
-	// store results
-	int num_it;
-	int x;
-	vector<double> final_weights(weights);
-	for(x=0; x<50;x++){
-		//print(weights);
+	vector<double> result(size);
+	vector<double> weights(n);
+	
+
+	for(int x=0; x<num_it;x++){
 		error_count = 0;
-		for(int i=0; i < values.size(); i++){
-			//print(weights);
-			//cout << "values[i]" << endl;
+		for(int i=0; i < size; i++){
 			result[i] = dot_product(values[i], weights);
 			error = output[i] - result[i];
-			//cout << "Error   " << error << endl;
 			for(int j=0; j<grad_weights.size(); j++){
 				double nuevoVar = learning_rate * error * values[i][j];
 				grad_weights[j] = grad_weights[j] + nuevoVar;
-				//cout << "variacion " << nuevoVar;
 			}
 		}
 		for (int k=0; k<weights.size(); k++){
 			weights[k] = weights[k] + grad_weights[k];
 		}
 		error_count = error_cuadrado(result,output);
-		//cout << error_count << endl;
-		// si encuentro un peso menor
-		cout << error_count << endl;
-		if (error_count < min_error) {
-			num_it = x;
-			final_weights = weights;
-			min_error = error_count;
-		}
-		if(error_count < 0){
-			break;
-		}
+		final_weights[x] = weights;
+		cout << error_count << " ";
 	}
-	//cout << "Iteraciones: " << num_it << " Error Minimo: " << min_error << endl;
-	//cout << "Pesos: ";
-	//print(final_weights);
-	return 0;
+	cout << "\n" << endl;
+	return 1;
+}
+
+
+int testing(vector<vector<double> >& final_weights, vector<vector<double> >& values, vector<double>& output){
+	int num_it = final_weights.size();
+	double error_count;
+	double error;
+	vector<double> result(values.size());
+
+	for(int x=0; x<num_it;x++){
+		error_count = 0;
+		for(int i=145; i < values.size(); i++){
+			result[i-145] = dot_product(values[i], final_weights[x]);
+		}
+		error_count = error_cuadrado(result,output);
+		cout << error_count << " ";
+	}
+	cout << "\n" << endl;
+	return 1;
 }
 
 
 
 
-
-
-
-int adaline_incremental(int n, double learning_rate, vector<vector<double> >& values, vector<double>& output){
-	vector<double> weights(n);
-	print(weights);
+int adaline_incremental(int n, double learning_rate, vector<vector<double> >& values, vector<double>& output,
+						vector<vector<double> >& final_weights, int size){
+	int num_it = final_weights.size();
 	vector<double> grad_weights(n);
 	double error_count;
 	double error;
-	double min_error = 1000;
-	vector<double> result(values.size());
-	int num_it = 0;
-	int x;
-	vector<double> final_weights(weights);
-	for(x=0; x<10;x++){
+	vector<double> result(size);
+	vector<double> weights(n);		
+
+
+	for(int x=0; x<num_it;x++){
 		error_count = 0;
-		for(int i=0; i < values.size(); i++){
+		for(int i=0; i < size; i++){
 			result[i] = dot_product(values[i], weights);
 			error = output[i] - result[i];
 			for(int j=0 ; j < weights.size(); j++){
@@ -255,23 +241,11 @@ int adaline_incremental(int n, double learning_rate, vector<vector<double> >& va
 			}
 			
 		}
-//		cout << x << ") weights[j]";
-//		print_int(weights);
-//		cout << "" << endl;
+		final_weights[x] = weights;
 		error_count = error_cuadrado(result,output);
-		cout << "ERROR_COUNT: " << error_count << endl;
-		if (error_count < min_error) {
-			num_it = x;
-			final_weights = weights;
-			min_error = error_count;
-		}
-		if(error_count < 0){
-			break;
-		}
+		cout << error_count << " ";
 	}
-	cout << "Iteraciones: " << num_it << " Error Minimo: " << min_error << endl;
-	cout << "Pesos: ";
-	print(final_weights);
+	cout << "\n" << endl;
 	return 0;
 }
 
@@ -279,7 +253,7 @@ int adaline_incremental(int n, double learning_rate, vector<vector<double> >& va
 
 
 int imprimir_uso(){
-	cerr << "Uso: ./tarea -[p | a] -[or | and | xor | liv] [alpha]" << endl;
+	cerr << "Uso: ./tarea -[p | a | ai] -[or | and | xor | liv] [alpha] [num_it]" << endl;
 	return 1;
 }
 
@@ -287,13 +261,23 @@ int imprimir_uso(){
 int main(int argc, char ** argv){
 	vector<vector<double> > values(4);
 	vector<double> output(4);
-	vector<vector<double> > in(145);
-	vector<double> out(145);	
+	vector<vector<double> > in(345);
+	vector<double> out(345);	
  
-	if (argc != 4) {
+	if (argc != 5) {
 		imprimir_uso();
 		return -1;
 	}
+
+	int num_it = atoi(argv[4]);
+	double alpha = atof(argv[3]);
+	if (num_it < 0 || alpha < 0){
+		imprimir_uso();
+		return -1;
+	}
+
+
+	vector<vector<double> > final_weights(num_it);
 
 	if (strcmp(argv[2],"-or")==0){
 		load_or(values,output);
@@ -310,17 +294,17 @@ int main(int argc, char ** argv){
 		imprimir_uso();
 		return -1;
 	}
-
+	
 	if (strcmp(argv[1], "-a")==0 and strcmp(argv[2], "-liv")!=0){
-		adaline(2, atof(argv[3]), values, output);
+		adaline(2, alpha, values, output, final_weights, values.size());
 	} else if (strcmp(argv[1], "-a")==0 and strcmp(argv[2], "-liv")==0){
-		//cout << "adaline .." << endl;
-		//adaline(5, 0.01, train, out_train);
-		//cout << "adaline2 .." << endl;
-		adaline(6, atof(argv[3]), in, out);
+		adaline(6, alpha, in, out, final_weights,145);
+		testing(final_weights, in, out);
+	} else if (strcmp(argv[1], "-ai")==0 and strcmp(argv[2], "-liv")!=0){
+		adaline_incremental(6, alpha, values, output, final_weights, values.size());
 		
 	} else if (strcmp(argv[1], "-p")==0 and strcmp(argv[2],"-liv") != 0){
-		perceptron(2, 0.5, 0.01, values, output);
+		perceptron(2, 0.5, alpha, values, output, num_it);
 	} else {
 		imprimir_uso();
 		return -1;
