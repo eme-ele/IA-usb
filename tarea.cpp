@@ -334,6 +334,10 @@ int main(int argc, char ** argv){
 	} else if (strcmp(argv[1], "-ai")==0 and strcmp(argv[2], "-liv")!=0){
 		adaline_incremental(6, alpha, values, output, final_weights, values.size());
 		
+	} else if (strcmp(argv[1], "-ai")==0 and strcmp(argv[2], "-liv")==0){
+		adaline_incremental(6, alpha, in, out, final_weights, 145);
+		testing(final_weights, in, out);
+		
 	} else if (strcmp(argv[1], "-p")==0 and strcmp(argv[2],"-liv") != 0){
 		perceptron(2, 0.5, alpha, values, output, num_it);
 	} else {
