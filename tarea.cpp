@@ -7,9 +7,19 @@
 #include <string>
 #include <fstream>
 
+/*
+Charles Ochoa - 0741286
+Maria Leonor Pacheco - 0741302
+
+Tarea de Prog 1:
+	Implementacion perceptron + adaline
+	para funciones booleanas y datos de UCI
+
+*/
 
 using namespace std;
 
+// carga datos funcion or
 int load_or(vector<vector<double> >& values, vector<double>& output){
 	vector<double> a(2);
 	vector<double> b(2);
@@ -26,6 +36,7 @@ int load_or(vector<vector<double> >& values, vector<double>& output){
 	return 1;
 }
 
+// carga datos funcion and
 int load_and(vector<vector<double> >& values, vector<double>& output){
 	vector<double> a(2);
 	vector<double> b(2);
@@ -42,6 +53,7 @@ int load_and(vector<vector<double> >& values, vector<double>& output){
 	return 1;
 }
 
+// carga datos funcion xor
 int load_xor(vector<vector<double> >& values, vector<double>& output){
 	vector<double> a(2);
 	vector<double> b(2);
@@ -58,6 +70,7 @@ int load_xor(vector<vector<double> >& values, vector<double>& output){
 	return 1;
 }
 
+// funcion auxiliar de impresion de vectores double
 int print(vector<double>& weights){
 	for (int i=0; i < weights.size(); i++){
 		cout << weights[i] << " ";
@@ -66,6 +79,7 @@ int print(vector<double>& weights){
 	return 1;
 }
 
+// funcion auxiliar de impresion de vectores int
 int print_int(vector<double>& weights){
 	for (int i=0; i < weights.size(); i++){
 		cout << weights[i] << " ";
@@ -74,6 +88,7 @@ int print_int(vector<double>& weights){
 	return 1;
 }
 
+// funcion auxiliar de impresion de ejemplos
 int print_values(vector<vector<double> >& values){
 	for (int i=0; i < values.size(); i++){
 		cout << i << ": ";
@@ -84,7 +99,7 @@ int print_values(vector<vector<double> >& values){
 	return 1;
 }
 
-
+// carga de datos UCI
 int load_bupa(vector<vector<double> >& values, vector<double>& out, string filename){
 	ifstream myfile (filename.c_str());
 	string line;
@@ -125,6 +140,7 @@ int load_bupa(vector<vector<double> >& values, vector<double>& out, string filen
 	return 1;
 }
 
+// calculo de salida
 double dot_product(vector<double> value, vector<double>& weights){
 	double sum = 0; 
 	for(int i=0; i < value.size();i++){
@@ -133,6 +149,7 @@ double dot_product(vector<double> value, vector<double>& weights){
 	return sum;
 }
 
+// aprendizaje con un perceptron
 int perceptron(int n, double threshold, double learning_rate, vector<vector<double> >& values, 
 				vector<double>& output, int num_it){
 	vector<double> weights(n);	
@@ -142,7 +159,6 @@ int perceptron(int n, double threshold, double learning_rate, vector<vector<doub
 	for(int t=0;t<num_it;t++){
 		error_count = 0;
 		for(int i=0; i < values.size(); i++){
-			print(weights);
 			result = dot_product(values[i], weights) > threshold;
 			error = output[i] - result;
 			if (error != 0){
@@ -152,12 +168,17 @@ int perceptron(int n, double threshold, double learning_rate, vector<vector<doub
 				}
 			}
 		}
+		cout << error_count << " ";
 		if (error_count == 0) {
+			cout << error_count << "\n" << endl;
 			return 1;
 		}
 	}
+	cout << error_count << "\n" << endl;
+	return 1;
 }
 
+// error cuadrado para neurona adaline
 double error_cuadrado(vector<double>& o, vector<double>& t){
 	double sum = 0.0;
 	for(int i=0; i < o.size(); i++){
@@ -166,7 +187,8 @@ double error_cuadrado(vector<double>& o, vector<double>& t){
 	}
 	return sum/2;	
 }
-
+ 
+// aprendizaje con una neurona adaline (regla delta)
 int adaline(int n, double learning_rate, vector<vector<double> >& values, vector<double>& output, 
 			vector<vector<double> >& final_weights, int size){
 	int num_it = final_weights.size();
@@ -198,7 +220,7 @@ int adaline(int n, double learning_rate, vector<vector<double> >& values, vector
 	return 1;
 }
 
-
+// prueba de aprendizaje adaline en datos UCI
 int testing(vector<vector<double> >& final_weights, vector<vector<double> >& values, vector<double>& output){
 	int num_it = final_weights.size();
 	double error_count;
@@ -219,7 +241,7 @@ int testing(vector<vector<double> >& final_weights, vector<vector<double> >& val
 
 
 
-
+// aprendizaje incremental para la regla delta
 int adaline_incremental(int n, double learning_rate, vector<vector<double> >& values, vector<double>& output,
 						vector<vector<double> >& final_weights, int size){
 	int num_it = final_weights.size();
@@ -251,9 +273,9 @@ int adaline_incremental(int n, double learning_rate, vector<vector<double> >& va
 
 
 
-
+// muestra forma de invocar el programa
 int imprimir_uso(){
-	cerr << "Uso: ./tarea -[p | a | ai] -[or | and | xor | liv] [alpha] [num_it]" << endl;
+	cerr << "Uso: ./tarea -[p | a | ai] -[or | and | xor | liv] [alpha] [num_it] [filename *opcional*]" << endl;
 	return 1;
 }
 
@@ -263,8 +285,9 @@ int main(int argc, char ** argv){
 	vector<double> output(4);
 	vector<vector<double> > in(345);
 	vector<double> out(345);	
+	string filename;
  
-	if (argc != 5) {
+	if (argc < 5 or argc > 6) {
 		imprimir_uso();
 		return -1;
 	}
@@ -286,9 +309,17 @@ int main(int argc, char ** argv){
 	} else if (strcmp(argv[2],"-xor")==0) {
 		load_xor(values,output);
 	} else if (strcmp(argv[2],"-liv")==0){
-		if (load_bupa(in, out, "bupa.data") < 0){
-			cerr << "error cargando el archivo bupa.data" << endl;
+		if (argc < 6){
+			imprimir_uso();
+			cout << "Nota: incluir nombre de archivo de datos" << endl;
 			return -1;
+		}
+		else{
+			filename = argv[5];
+			if (load_bupa(in, out, filename) < 0){
+				cerr << "error cargando el archivo" << endl;
+				return -1;
+			}
 		}
 	} else {
 		imprimir_uso();
