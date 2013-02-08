@@ -121,8 +121,8 @@ int load_bupa(vector<vector<double> >& values, vector<double>& out, string filen
 		return -1;
 	}
 	
-	print_values(values);
-	print(out);
+	//print_values(values);
+	//print(out);
 	myfile.close();
 	return 1;
 }
@@ -144,7 +144,7 @@ int perceptron(int n, double threshold, double learning_rate, vector<vector<doub
 	int error_count;
 	double error;
 	int result;
-	while(1){
+	for(int t=0;t<1000;t++){
 		error_count = 0;
 		for(int i=0; i < values.size(); i++){
 			print(weights);
@@ -179,7 +179,7 @@ int adaline(int n, double learning_rate, vector<vector<double> >& values, vector
 	//for(int z=0; z< weights.size();z++ ){
 	//	weights[z]= (rand() /(double) RAND_MAX);
 	//}
-	print(weights);
+	//print(weights);
 	vector<double> grad_weights(n);
 	
 	double error_count;
@@ -190,7 +190,7 @@ int adaline(int n, double learning_rate, vector<vector<double> >& values, vector
 	int num_it;
 	int x;
 	vector<double> final_weights(weights);
-	for(x=0; x<24;x++){
+	for(x=0; x<50;x++){
 		//print(weights);
 		error_count = 0;
 		for(int i=0; i < values.size(); i++){
@@ -202,17 +202,64 @@ int adaline(int n, double learning_rate, vector<vector<double> >& values, vector
 			for(int j=0; j<grad_weights.size(); j++){
 				double nuevoVar = learning_rate * error * values[i][j];
 				grad_weights[j] = grad_weights[j] + nuevoVar;
-				cout << "variacion " << nuevoVar;
+				//cout << "variacion " << nuevoVar;
 			}
 		}
 		for (int k=0; k<weights.size(); k++){
 			weights[k] = weights[k] + grad_weights[k];
 		}
-
 		error_count = error_cuadrado(result,output);
 		//cout << error_count << endl;
 		// si encuentro un peso menor
-		cout << "ERROR COUNT    " << error_count << endl;
+		cout << error_count << endl;
+		if (error_count < min_error) {
+			num_it = x;
+			final_weights = weights;
+			min_error = error_count;
+		}
+		if(error_count < 0){
+			break;
+		}
+	}
+	//cout << "Iteraciones: " << num_it << " Error Minimo: " << min_error << endl;
+	//cout << "Pesos: ";
+	//print(final_weights);
+	return 0;
+}
+
+
+
+
+
+
+
+int adaline_incremental(int n, double learning_rate, vector<vector<double> >& values, vector<double>& output){
+	vector<double> weights(n);
+	print(weights);
+	vector<double> grad_weights(n);
+	double error_count;
+	double error;
+	double min_error = 1000;
+	vector<double> result(values.size());
+	int num_it = 0;
+	int x;
+	vector<double> final_weights(weights);
+	for(x=0; x<10;x++){
+		error_count = 0;
+		for(int i=0; i < values.size(); i++){
+			result[i] = dot_product(values[i], weights);
+			error = output[i] - result[i];
+			for(int j=0 ; j < weights.size(); j++){
+				double nuevoVar = learning_rate * error * values[i][j];
+				weights[j] = weights[j] + nuevoVar;
+			}
+			
+		}
+//		cout << x << ") weights[j]";
+//		print_int(weights);
+//		cout << "" << endl;
+		error_count = error_cuadrado(result,output);
+		cout << "ERROR_COUNT: " << error_count << endl;
 		if (error_count < min_error) {
 			num_it = x;
 			final_weights = weights;
@@ -228,8 +275,11 @@ int adaline(int n, double learning_rate, vector<vector<double> >& values, vector
 	return 0;
 }
 
+
+
+
 int imprimir_uso(){
-	cerr << "Uso: ./tarea -[p | a] -[or | and | xor | liv]" << endl;
+	cerr << "Uso: ./tarea -[p | a] -[or | and | xor | liv] [alpha]" << endl;
 	return 1;
 }
 
@@ -240,7 +290,7 @@ int main(int argc, char ** argv){
 	vector<vector<double> > in(145);
 	vector<double> out(145);	
  
-	if (argc != 3) {
+	if (argc != 4) {
 		imprimir_uso();
 		return -1;
 	}
@@ -262,12 +312,12 @@ int main(int argc, char ** argv){
 	}
 
 	if (strcmp(argv[1], "-a")==0 and strcmp(argv[2], "-liv")!=0){
-		adaline(2, 0.01, values, output);
+		adaline(2, atof(argv[3]), values, output);
 	} else if (strcmp(argv[1], "-a")==0 and strcmp(argv[2], "-liv")==0){
 		//cout << "adaline .." << endl;
 		//adaline(5, 0.01, train, out_train);
-		cout << "adaline2 .." << endl;
-		adaline(6, 0.001, in, out);
+		//cout << "adaline2 .." << endl;
+		adaline(6, atof(argv[3]), in, out);
 		
 	} else if (strcmp(argv[1], "-p")==0 and strcmp(argv[2],"-liv") != 0){
 		perceptron(2, 0.5, 0.01, values, output);
@@ -277,4 +327,7 @@ int main(int argc, char ** argv){
 	}
 
 }
+
+
+//0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5 y 0.99.
 
