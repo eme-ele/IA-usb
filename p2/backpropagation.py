@@ -12,30 +12,60 @@ class Neuron():
 		for i in range(self.n):
 			sum += (activations[i] * self.weights[i])
 		return sum	
+
+	def update_weights(self, deriv, activation):
+		for i in range(self.n):
+			delta = deriv[i] * activation 
+			self.weights[i] += delta + self.last_delta[i]
+			self.last_delta[i] = delta
+	
 			
 
 class NeuralNetwork():	
 	def __init__(self, num_inputs, num_hidden, num_outputs):
-		self.ni = num_inputs
+		self.ni = num_inputs+1  #+1 bias
 		self.nh = num_hidden
 		self.no = num_outputs
 		# activaciones
-		self.ai = [1.0]*num_inputs+1
-		self.ah = [1.0]*num_hidden
-		self.ao = [1.0]*num_outputs
+		self.ai = [1.0]*self.ni
+		self.ah = [1.0]*self.nh
+		self.ao = [1.0]*self.no
 		# capas
-		self.lh = [Neuron(num_inputs+1)]*num_hidden
-		self.lo = [Neuron(num_hidden)]*num_outputs
+		self.li = [Neuron(self.nh)]*self.ni
+		self.lh = [Neuron(self.no)]*self.nh
 
 	def forward_propagate(self, inputs):
 		for i in range(self.ni):
 			self.ai[i] = inputs[i]
 		for j in range(self.nh):
-			self.ah[j] = sigmoid(lh[j].activate(ai))
+			self.ah[j] = sigmoid(li[j].activate(ai))
 		for k in range(self.no):
 			self.ao[k] = sigmoid(lh[k].activate(ah))
-		return ao
-	
+
+	def back_propagate(self, targets):
+		output_deriv = [0.0]*self.no
+		hidden_deriv = [0.0]*self.nh
+
+		# calcular output deriv
+		for k in range(self.no):
+			error = targets[k] - self.ao[k] 
+			output_deriv[k] = error * dsigmoid(self.ao[l])
+
+		# actualizar pesos de salida
+		for j in range(self.nh):
+			lh[j].update_weights(output_deriv, self.ah)
+
+		# calcular hidden deriv
+		for j in range(self.nh):
+			error = 0.0
+			for k in range(self.no):
+				error += output_deriv * self.lh[j].weights[k]
+			hidden_deriv[j] = error * dsigmoid(self.ah[j])
+
+		# actualizar pesos internos
+		for i in range(self.ni):
+			li[i].update_weights(hidden_deriv, self.ai)
+
 	
 	def train(self, examples, max_iterations=1000):
 		correct = 0
@@ -43,10 +73,8 @@ class NeuralNetwork():
 			for e in examples:
 				inputs = e[0]
 				targets = e[1]
-				output = self.forward_propagate(inputs)
-				
-
-				
+				self.forward_propagate(inputs)
+				self.back_propagate(targets)			
 		
 
 def init_weights(num_inputs):
@@ -82,6 +110,7 @@ def main():
 	]
 
 	network = NeuralNetwork(opts.num_inputs, opts.num_hidden, 1)
+	network.train(xor)
 	
 #	(xor, opts.num_inputs, opts.iterations, opts.num_hidden, opts.learning_rate)	
 
