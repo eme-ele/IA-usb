@@ -37,7 +37,7 @@ class NeuralNetwork():
 		return ao
 	
 	
-	def train(self, examples, max_iterations=1000)
+	def train(self, examples, max_iterations=1000):
 		correct = 0
 		for i in range(max_iterations):
 			for e in examples:
@@ -64,11 +64,10 @@ def main():
 	# parse input options
 	parser = optparse.OptionParser()
 	parser.add_option('-i', help='number of inputs', type='int', dest='num_inputs')
-	parser.add_option('-h', help='number of hidden layer neurons', type='int', dest='num_hidden')
+	parser.add_option('-n', help='number of hidden layer neurons', type='int', dest='num_hidden')
 	parser.add_option('-l', help='learning rate', type='float', dest='learning_rate')	
-	parser.add_option('-n', help='number of iterations', type='int', dest='iterations')	
 	(opts, args) = parser.parse_args()
-	mandatories = ['num_inputs', 'num_hidden', 'learning_rate', 'iterations']
+	mandatories = ['num_inputs', 'num_hidden', 'learning_rate']
 	for m in mandatories:
 		if not opts.__dict__[m]:
 			print "Mandatory option missing"
