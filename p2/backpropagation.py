@@ -1,9 +1,10 @@
 import optparse
 import math
+import random
 
 class Neuron():	
 	def __init__(self, length):
-		self.n = lenght
+		self.n = length
 		self.weights = init_weights(length);
 		self.last_delta = [0.0]*(length)
 	
@@ -13,11 +14,6 @@ class Neuron():
 			sum += (activations[i] * self.weights[i])
 		return sum	
 
-	def update_weights(self, deriv, activation):
-		for i in range(self.n):
-			delta = deriv[i] * activation 
-			self.weights[i] += delta + self.last_delta[i]
-			self.last_delta[i] = delta
 	
 			
 
@@ -31,40 +27,49 @@ class NeuralNetwork():
 		self.ah = [1.0]*self.nh
 		self.ao = [1.0]*self.no
 		# capas
-		self.li = [Neuron(self.nh)]*self.ni
-		self.lh = [Neuron(self.no)]*self.nh
+		self.lh = [Neuron(self.ni)]*self.nh
+		self.lo = [Neuron(self.nh)]*self.no
 
 	def forward_propagate(self, inputs):
-		for i in range(self.ni):
+		for i in range(self.ni-1):
 			self.ai[i] = inputs[i]
 		for j in range(self.nh):
-			self.ah[j] = sigmoid(li[j].activate(ai))
+			self.ah[j] = sigmoid(self.lh[j].activate(self.ai))
 		for k in range(self.no):
-			self.ao[k] = sigmoid(lh[k].activate(ah))
+			self.ao[k] = sigmoid(self.lo[k].activate(self.ah))
+		return self.ao
 
-	def back_propagate(self, targets):
+	'''def back_propagate(self, targets):
 		output_deriv = [0.0]*self.no
 		hidden_deriv = [0.0]*self.nh
 
 		# calcular output deriv
 		for k in range(self.no):
 			error = targets[k] - self.ao[k] 
-			output_deriv[k] = error * dsigmoid(self.ao[l])
+			output_deriv[k] = error * dsigmoid(self.ao[k])
 
 		# actualizar pesos de salida
-		for j in range(self.nh):
-			lh[j].update_weights(output_deriv, self.ah)
+    	for j in range(self.nh):
+      		for k in range(self.no):
+        	# output_deltas[k] * self.ah[j] is the full derivative of dError/dweight[j][k]
+        		change = output_deriv[k] * self.ah[j]
+        		self.lo[j].weights[k] += N*change + M*self.lo[j].last_delta[k]
+        	self.last_delta[j].weights[k] = change
 
 		# calcular hidden deriv
 		for j in range(self.nh):
 			error = 0.0
 			for k in range(self.no):
-				error += output_deriv * self.lh[j].weights[k]
+				error += output_deriv * self.lo[j].weights[k]
 			hidden_deriv[j] = error * dsigmoid(self.ah[j])
 
 		# actualizar pesos internos
-		for i in range(self.ni):
-			li[i].update_weights(hidden_deriv, self.ai)
+    	for i in range (self.ni):
+      		for j in range (self.nh):
+        		change = hidden_deriv[j] * self.ai[i]
+        		#print 'activation',self.ai[i],'synapse',i,j,'change',change
+        		self.lh[i].weights[j] += N*change + M*self.lh[i].last_delta[j]
+        		self.lh[i].last_delta[j] = change'''
 
 	
 	def train(self, examples, max_iterations=1000):
@@ -74,8 +79,12 @@ class NeuralNetwork():
 				inputs = e[0]
 				targets = e[1]
 				self.forward_propagate(inputs)
-				self.back_propagate(targets)			
-		
+				#self.back_propagate(targets)			
+	
+	def test(self,examples):
+		for p in examples:
+			inputs = p[0]
+			print 'Inputs:', p[0], '-->', self.forward_propagate(inputs), '\tTarget', p[1]
 
 def init_weights(num_inputs):
 	w = []
@@ -84,7 +93,10 @@ def init_weights(num_inputs):
 	return w
 
 def sigmoid(activation):
-	return 1.0 / (1.0 + exp(-activation))
+	return 1.0 / (1.0 + math.exp(-activation))
+
+def dsigmoid (y):
+  return 1 - y**2
 
 
 def main():
@@ -111,6 +123,8 @@ def main():
 
 	network = NeuralNetwork(opts.num_inputs, opts.num_hidden, 1)
 	network.train(xor)
+	network.test(xor)
+
 	
 #	(xor, opts.num_inputs, opts.iterations, opts.num_hidden, opts.learning_rate)	
 
