@@ -10,8 +10,8 @@ class NeuralNetwork(object):
 		self.num_hidden = num_hidden
 		self.num_outputs = num_outputs
 		
-		self.wih = random_matrix(num_inputs, num_hidden, -1, 1)
-		self.who = random_matrix(num_hidden, num_outputs, -1, 1)
+		self.wih = random_matrix(num_inputs, num_hidden, -0.5, 0.5)
+		self.who = random_matrix(num_hidden, num_outputs, -0.5, 0.5)
 		#vectores de activacion de las capaz hidden y output
 		self.ah = [0.0]*num_hidden
 		self.ao = [0.0]*num_outputs
@@ -58,7 +58,7 @@ class NeuralNetwork(object):
 				A_who = learning_rate*error_out[o]*self.ao[o]
 				self.who[h][o] = self.who[h][o] + A_who
 
-	def train(self, examples, learning_rate, max_iterations = 100000):
+	def train(self, examples, learning_rate, max_iterations = 1000):
 
 		for it in range(max_iterations):
 			for e in examples:
@@ -67,8 +67,11 @@ class NeuralNetwork(object):
 				self.propagate_forward(inputs)
 				self.propagate_backward(targets,learning_rate)
 				#print self.test(examples)
-				print self.test(examples)
-	def test(self,examples):
+			print self.get_error(examples)
+		#self.test(examples)
+
+
+	def get_error(self,examples):
 		error = 0.0
 		for e in examples:
 			input_ = e[0]
@@ -78,6 +81,11 @@ class NeuralNetwork(object):
 			for elem in range(len(output_)):
 				error += (output_[elem] - predicted_[elem])**2
 		return error*0.5
+
+	def test(self, examples):
+		for e in examples:
+			print 'Inputs:', e[0], '-->', self.propagate_forward(e[0]), '\tTarget', e[1]
+
 
 
 
