@@ -58,7 +58,7 @@ class NeuralNetwork(object):
 				A_who = learning_rate*error_out[o]*self.ao[o]
 				self.who[h][o] = self.who[h][o] + A_who
 
-	def train(self, examples, learning_rate, max_iterations = 1000):
+	def train(self, examples, learning_rate, max_iterations = 100000):
 
 		for it in range(max_iterations):
 			for e in examples:
@@ -66,12 +66,18 @@ class NeuralNetwork(object):
 				targets = e[1]
 				self.propagate_forward(inputs)
 				self.propagate_backward(targets,learning_rate)
-		self.test(examples)
-
+				#print self.test(examples)
+				print self.test(examples)
 	def test(self,examples):
-		for p in examples:
-			print 'Inputs:', p[0], '-->', self.propagate_forward(p[0]), '\tTarget', p[1]
-
+		error = 0.0
+		for e in examples:
+			input_ = e[0]
+			predicted_ = self.propagate_forward(e[0])
+			output_ = e[1]
+			#print 'Inputs:', input_, '-->', predicted_, '\tTarget', output_
+			for elem in range(len(output_)):
+				error += (output_[elem] - predicted_[elem])**2
+		return error*0.5
 
 
 
