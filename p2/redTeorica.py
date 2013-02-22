@@ -16,8 +16,8 @@ class NeuralNetwork(object):
 		self.ah = [0.0]*num_hidden
 		self.ao = [0.0]*num_outputs
 		#los valores de 
-		#self.A_wih = [[0.0]*num_hidden]*num_inputs
-		#self.A_who = [[0.0]*num_outputs]*num_hidden
+		self.A_wih = [[0.0]*num_hidden]*num_inputs
+		self.A_who = [[0.0]*num_outputs]*num_hidden
 
 	def propagate_forward(self, inputs):
 
@@ -34,7 +34,7 @@ class NeuralNetwork(object):
 			self.ao[o] = sigmoid(sum)
 		return self.ao
 
-	def propagate_backward(self, targets, learning_rate):
+	def propagate_backward(self, targets, learning_rate, momentum):
 		error_out = [0.0]*self.num_outputs
 		for o in range(self.num_outputs):
 			error_out[o] = self.ao[o]*(1 - self.ao[o])*(targets[o] - self.ao[o])
@@ -50,22 +50,22 @@ class NeuralNetwork(object):
 		#actualizacion
 		for i in range(self.num_inputs):
 			for h in range(self.num_hidden):
-				A_wih = learning_rate*error_hid[h]*self.ah[h]
-				self.wih[i][h] = self.wih[i][h] + A_wih
+				self.A_wih[i][h] = learning_rate*error_hid[h]*self.ah[h] + momentum*self.A_wih[i][h]
+				self.wih[i][h] = self.wih[i][h] + self.A_wih[i][h]
 
 		for h in range(self.num_hidden):
 			for o in range(self.num_outputs):
-				A_who = learning_rate*error_out[o]*self.ao[o]
-				self.who[h][o] = self.who[h][o] + A_who
+				self.A_who[h][o] = learning_rate*error_out[o]*self.ao[o] + momentum*self.A_who[h][o]
+				self.who[h][o] = self.who[h][o] + self.A_who[h][o]
 
-	def train(self, examples, learning_rate, max_iterations = 1000):
+	def train(self, examples, learning_rate, momentum, max_iterations = 1000):
 
 		for it in range(max_iterations):
 			for e in examples:
 				inputs = e[0]
 				targets = e[1]
 				self.propagate_forward(inputs)
-				self.propagate_backward(targets,learning_rate)
+				self.propagate_backward(targets,learning_rate,momentum)
 				#print self.test(examples)
 			print self.get_error(examples)
 		#self.test(examples)
@@ -123,7 +123,7 @@ def main():
 		[[1,1], [0]]
 	]
 	network = NeuralNetwork(2,opts.num_hidden,1)
-	network.train(xor, opts.learning_rate)
+	network.train(xor, opts.learning_rate,0.1)
 
 if __name__ == "__main__":
 	main()
