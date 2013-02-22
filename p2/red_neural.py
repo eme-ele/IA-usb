@@ -108,27 +108,3 @@ def random_matrix(I,  J,  a,  b):
 		matrix.append(fila)
 	return matrix
 
-def main():
-	# parse input options
-	parser = optparse.OptionParser()
-	parser.add_option('-n', help='number of hidden layer neurons', type='int', dest='num_hidden')
-	parser.add_option('-l', help='learning rate', type='float', dest='learning_rate')	
-	(opts, args) = parser.parse_args()
-	mandatories = ['num_hidden', 'learning_rate']
-	for m in mandatories:
-		if not opts.__dict__[m]:
-			print "Mandatory option missing"
-			parser.print_help()
-			exit(-1)
-
-	xor = [
-		[[0,0], [1]],
-		[[0,1], [1]], 
-		[[1,0], [1]],
-		[[1,1], [0]]
-	]
-	network = NeuralNetwork(2,opts.num_hidden,1)
-	network.train(xor, opts.learning_rate)
-
-if __name__ == "__main__":
-	main()
