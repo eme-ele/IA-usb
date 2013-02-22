@@ -58,14 +58,14 @@ class NeuralNetwork(object):
 				self.A_who[h][o] = learning_rate*error_out[o]*self.ao[o] + momentum*self.A_who[h][o]
 				self.who[h][o] = self.who[h][o] + self.A_who[h][o]
 
-	def train(self, examples, learning_rate, max_iterations = 100):
+	def train(self, examples, learning_rate, momentum, max_iterations = 1000):
 
 		for it in range(max_iterations):
 			for e in examples:
 				inputs = e[0]
 				targets = e[1]
 				self.propagate_forward(inputs)
-				self.propagate_backward(targets,learning_rate,0.1)
+				self.propagate_backward(targets,learning_rate,momentum)
 				#print self.test(examples)
 			print self.get_error(examples)
 		#self.test(examples)
@@ -123,7 +123,7 @@ def main():
 		[[1,1], [0]]
 	]
 	network = NeuralNetwork(2,opts.num_hidden,1)
-	network.train(xor, opts.learning_rate)
+	network.train(xor, opts.learning_rate,0.1)
 
 if __name__ == "__main__":
 	main()
