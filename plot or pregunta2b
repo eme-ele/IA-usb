@@ -1,0 +1,60 @@
+////////////////////////////////////or //////////////////////////////////////////////////////
+
+//SHELL
+
+rm Out/pregunta2b_*
+./tarea -a -or 0.01 100 >> Out/pregunta2b_or_A.txt
+./tarea -ai -or 0.01 100 >> Out/pregunta2b_or_AI.txt
+./tarea -a -and 0.01 100 >> Out/pregunta2b_and_A.txt
+./tarea -ai -and 0.01 100 >> Out/pregunta2b_and_AI.txt
+./tarea -a -xor 0.01 100 >> Out/pregunta2b_xor_A.txt
+./tarea -ai -xor 0.01 100 >> Out/pregunta2b_xor_AI.txt
+
+
+
+
+////////////////////////////////////procesamiento //////////////////////////////////////////////////////
+
+
+//python
+
+import os
+lista = os.listdir("Out/")[:1]
+import re
+word = re.compile(r'[A-Za-z]+')
+for arc in lista:
+	if arc[:10]=="pregunta2b":
+		f = open("Out/" + arc,'r')
+		content = f.read().split()
+		f.close()
+		f = open("Out/" + arc,'w')
+		f.write(re.sub(word,"",content))
+		f.close()
+
+
+
+//R
+
+to  = read.table("Out/pregunta2b_or_A.txt")
+tio  = read.table("Out/pregunta2b_or_AI.txt")
+ta  = read.table("Out/pregunta2b_and_A.txt")
+tia  = read.table("Out/pregunta2b_and_AI.txt")
+tx  = read.table("Out/pregunta2b_xor_A.txt")
+tix  = read.table("Out/pregunta2b_xor_AI.txt")
+
+
+
+par(mfrow=c(1,3))
+plot(c(1:length(to)),to, type="l", xlab="OR", ylab="Error", col="blue")
+points(c(1:length(tio)),tio, type="l", col="red")
+
+plot(c(1:length(ta)),ta, type="l", col="blue", xlab="AND", ylab="Error")
+points(c(1:length(tia)),tia, type="l", col="red")
+
+plot(c(1:length(tx)),tx, type="l", col= "blue", xlab="XOR", ylab="Error")
+points(c(1:length(tix)),tix, type="l", col="red")
+
+
+
+
+

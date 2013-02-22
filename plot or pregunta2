@@ -1,0 +1,118 @@
+////////////////////////////////////or //////////////////////////////////////////////////////
+
+//SHELL
+
+rm Out/pregunta2_*
+./tarea -a -or 0.01 50 >> Out/pregunta2_001.txt
+./tarea -a -or 0.05 50 >> Out/pregunta2_005.txt
+./tarea -a -or 0.1 50 >> Out/pregunta2_01.txt
+./tarea -a -or 0.2 50 >> Out/pregunta2_02.txt
+./tarea -a -or 0.3 50 >> Out/pregunta2_03.txt
+./tarea -a -or 0.4 50 >> Out/pregunta2_04.txt
+./tarea -a -or 0.5 50 >> Out/pregunta2_05.txt
+./tarea -a -or 0.99 50 >> Out/pregunta2_099.txt
+
+
+
+
+//////////////////////////////////// xor //////////////////////////////////////////////////////
+
+//SHELL
+
+rm Out/pregunta2_*
+./tarea -ai -xor 0.01 50 >> Out/pregunta2_001.txt
+./tarea -ai -xor 0.05 50 >> Out/pregunta2_005.txt
+./tarea -ai -xor 0.1 50 >> Out/pregunta2_01.txt
+./tarea -ai -xor 0.2 50 >> Out/pregunta2_02.txt
+./tarea -ai -xor 0.3 50 >> Out/pregunta2_03.txt
+./tarea -ai -xor 0.4 50 >> Out/pregunta2_04.txt
+./tarea -ai -xor 0.5 50 >> Out/pregunta2_05.txt
+./tarea -ai -xor 0.99 50 >> Out/pregunta2_099.txt
+
+
+////////////////////////////////////and //////////////////////////////////////////////////////
+
+//SHELL
+
+rm Out/pregunta2_*
+./tarea -a -and 0.01 50 >> Out/pregunta2_001.txt
+./tarea -a -and 0.05 50 >> Out/pregunta2_005.txt
+./tarea -a -and 0.1 50 >> Out/pregunta2_01.txt
+./tarea -a -and 0.2 50 >> Out/pregunta2_02.txt
+./tarea -a -and 0.3 50 >> Out/pregunta2_03.txt
+./tarea -a -and 0.4 50 >> Out/pregunta2_04.txt
+./tarea -a -and 0.5 50 >> Out/pregunta2_05.txt
+./tarea -a -and 0.99 50 >> Out/pregunta2_099.txt
+
+
+////////////////////////////////////procesamiento //////////////////////////////////////////////////////
+
+
+//python
+
+import os
+lista = os.listdir("Out/")[:1]
+import re
+word = re.compile(r'[A-Za-z]+')
+for arc in lista:
+	if arc[:10]=="pregunta2_":
+		f = open("Out/" + arc,'r')
+		content = f.read()
+		f.close()
+		f = open("Out/" + arc,'w')
+		f.write(re.sub(word,"",content))
+		f.close()
+
+
+
+//R
+
+t001  = read.table("Out/pregunta2_001.txt")
+t005  = read.table("Out/pregunta2_005.txt")
+t01  = read.table("Out/pregunta2_01.txt")
+t02  = read.table("Out/pregunta2_02.txt")
+t03  = read.table("Out/pregunta2_03.txt")
+t04  = read.table("Out/pregunta2_04.txt")
+t05  = read.table("Out/pregunta2_05.txt")
+t099  = read.table("Out/pregunta2_099.txt")
+
+
+
+par(mfrow=c(4,2))
+
+plot(c(1:length(t001)),t001, type="l", xlab="Alpha: 0.01", ylab="Error")
+
+plot(c(1:length(t005)),t005, type="l", col="purple", xlab="Alpha: 0.05", ylab="Error")
+plot(c(1:length(t01)),t01, type="l", col="blue", xlab="Alpha: 0.1", ylab="Error")
+plot(c(1:length(t02)),t02, type="l", col="green", xlab="Alpha: 0.2", ylab="Error")
+plot(c(1:length(t03)),t03, type="l", col= "black", xlab="Alpha: 0.3", ylab="Error")
+plot(c(1:length(t04)),t04, type="l", col="orange", xlab="Alpha: 0.4", ylab="Error")
+plot(c(1:length(t05)),t05, type="l", col="red", xlab="Alpha: 0.5", ylab="Error")
+plot(c(1:length(t099)),t099, type="l", col="purple", xlab="Alpha: 0.99", ylab="Error")
+
+
+
+
+/*
+
+par(mfrow=c(1,1))
+
+plot(c(1:length(t001)),t001, type="l", xlab="Alpha: 0.01", ylab="Error")
+
+plot(c(1:length(t005)),t005, type="l", col="purple", xlab="Alpha: 0.05", ylab="Error")
+points(c(1:length(t01)),t01, type="l", col="blue", xlab="Alpha: 0.1", ylab="Error")
+points(c(1:length(t02)),t02, type="l", col="green", xlab="Alpha: 0.2", ylab="Error")
+points(c(1:length(t03)),t03, type="l", col= "black", xlab="Alpha: 0.3", ylab="Error")
+points(c(1:length(t04)),t04, type="l", col="orange", xlab="Alpha: 0.4", ylab="Error")
+points(c(1:length(t05)),t05, type="l", col="red", xlab="Alpha: 0.5", ylab="Error")
+points(c(1:length(t099)),t099, type="l", col="purple", xlab="Alpha: 0.99", ylab="Error")
+
+
+
+
+
+
+
+
+
+
