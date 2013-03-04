@@ -7,3 +7,4 @@ Inteligencia Artificial II
 	
  * p2: implementacion en python de backpropagation en una red multicapa
 
+ * p3: implementacion en python del algoritmo genetico GABIL
