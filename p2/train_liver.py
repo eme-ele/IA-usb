@@ -1,7 +1,9 @@
 import red_neural
 import optparse
+#import ejemplo
 
-def to_int(lista):
+
+def to_float(lista):
 	lista_int = []
 	for l in lista:
 		lista_int.append(float(l))
@@ -11,17 +13,19 @@ def generate_train(train_file):
 	f = open(train_file, 'r')
 	train_set = []
 	for line in f:
-		splitted = line.strip().split()
-		splitted_int = to_int(splitted)
+		splitted = line.strip().split(',')
+		splitted_int = to_float(splitted)
 		example = []
-		example.append(splitted_int[:2])
-		# modifica salida de 1/-1 a 1/0				
-		if (splitted_int[2]==1):
+		example.append(splitted_int[:6])
+		# modifica salida de 2/1 a 1/0		
+		if (splitted_int[6]==2):
 			example.append([1.0])
 		else:
 			example.append([0.0])
 		train_set.append(example)
 	return train_set
+		
+	
 
 
 def main():
@@ -39,9 +43,8 @@ def main():
 			exit(-1)
 
 	pat = generate_train(opts.train_file)
-	network = red_neural.NeuralNetwork(2, opts.num_hidden, 1)
+	network = red_neural.NeuralNetwork(6, opts.num_hidden, 1)
 	network.train(pat, opts.learning_rate)
-
 
 
 if __name__ == "__main__":

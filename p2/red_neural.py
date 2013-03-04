@@ -58,7 +58,7 @@ class NeuralNetwork(object):
 				self.A_who[h][o] = learning_rate*error_out[o]*self.ao[o] + momentum*self.A_who[h][o]
 				self.who[h][o] = self.who[h][o] + self.A_who[h][o]
 
-	def train(self, examples, learning_rate, momentum, max_iterations = 1000):
+	def train(self, examples, learning_rate, momentum=0.1, max_iterations = 1000):
 
 		for it in range(max_iterations):
 			for e in examples:
@@ -66,9 +66,10 @@ class NeuralNetwork(object):
 				targets = e[1]
 				self.propagate_forward(inputs)
 				self.propagate_backward(targets,learning_rate,momentum)
-				#print self.test(examples)
-			print self.get_error(examples)
-		#self.test(examples)
+			# imprime error cada 10 iteraciones
+			if (it % 10 == 0):
+				print "Error: " +str(self.get_error(examples))
+		self.test(examples)
 
 
 	def get_error(self,examples):
@@ -77,19 +78,23 @@ class NeuralNetwork(object):
 			input_ = e[0]
 			predicted_ = self.propagate_forward(e[0])
 			output_ = e[1]
-			#print 'Inputs:', input_, '-->', predicted_, '\tTarget', output_
 			for elem in range(len(output_)):
 				error += (output_[elem] - predicted_[elem])**2
 		return error*0.5
 
 	def test(self, examples):
+		correct = 0
 		for e in examples:
-			print 'Inputs:', e[0], '-->', self.propagate_forward(e[0]), '\tTarget', e[1]
-
-
-
+			predicted = self.propagate_forward(e[0])
+			if (round(predicted[0]) == e[1][0]):
+				correct += 1
+			print 'Inputs:', e[0], '-->', predicted, '\tTarget', e[1]
+		print "Porcentaje de clasificacion correcta: "+str(float(correct)/float(len(examples)))
 
 def sigmoid(x):
+	# evitar error en sigmoid
+	if x < -709:
+		x = -709
 	return 1 / (1 + math.exp(-x))
 
 def random_matrix(I,  J,  a,  b):
@@ -103,27 +108,3 @@ def random_matrix(I,  J,  a,  b):
 		matrix.append(fila)
 	return matrix
 
-def main():
-	# parse input options
-	parser = optparse.OptionParser()
-	parser.add_option('-n', help='number of hidden layer neurons', type='int', dest='num_hidden')
-	parser.add_option('-l', help='learning rate', type='float', dest='learning_rate')	
-	(opts, args) = parser.parse_args()
-	mandatories = ['num_hidden', 'learning_rate']
-	for m in mandatories:
-		if not opts.__dict__[m]:
-			print "Mandatory option missing"
-			parser.print_help()
-			exit(-1)
-
-	xor = [
-		[[0,0], [1]],
-		[[0,1], [1]], 
-		[[1,0], [1]],
-		[[1,1], [0]]
-	]
-	network = NeuralNetwork(2,opts.num_hidden,1)
-	network.train(xor, opts.learning_rate,0.1)
-
-if __name__ == "__main__":
-	main()
