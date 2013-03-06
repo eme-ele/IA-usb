@@ -86,8 +86,38 @@ def crossover(individuo1,individuo2):
 def crossover_population(parents):
 	offspring = []
 	for i in range(0,len(parents),2):
-		offspring.extend(crossover(parents(i),parents(i+1),rule_size))
+		offspring.extend(crossover(parents[i],parents[i+1]))
 	return offspring
+
+def mutation(individuo):
+	point = random.randint(0,len(individuo)-1)
+	return individuo[:point] + str(int(not int(individuo[point]))) + individuo[point+1:]
+
+def make_mask(pos, length):
+	mask = ''
+	for i in range(length):
+		if i == pos:
+			mask += '1'
+		else:
+			mask += '0'
+	return mask
+
+def add_altern(PS):
+	altern_PS = []
+	for hipotesis in PS:
+		# probabilidad 0.01
+		if(random.randint(1, 100) == 1):
+			# ver donde hay ceros en los atributos y elegir uno aleatorio para alterar
+			cero_pos = []
+			for i in range(len(hipotesis)-1):
+				if hipotesis[i] == '0':
+					cero_pos.append(i)
+			mask = make_mask(cero_pos[random.randint(0, len(cero_pos)-1)], len(hipotesis))
+			altern_bin =  bin(int(hipotesis,2) | int(mask, 2))
+			hipotesis = complete_bin(rule_size, altern_bin[2:])
+		altern_PS.append(hipotesis)
+	return altern_PS
+
 
 
 def GA(ejemplos, p, r, m):
@@ -100,10 +130,15 @@ def GA(ejemplos, p, r, m):
 		PS = select_rueda_ruleta(P, n, get_total_fit(fitness_list), fitness_list)
 		print "PS: "+ str(PS)
 		n = int(round(r*p))
-		parents = select_rueda_ruleta(P, n, get_total_fitness(fitness_list), fitness_list)
-		print "To be crossed: " + str(Cross)
+		parents = select_rueda_ruleta(P, n, get_total_fit(fitness_list), fitness_list)
+		print "To be crossed: " + str(parents)
+		#offspring = crossover_population(parents)
+		PS = PS + crossover_population(parents)
+		print "PS: "+str(PS)
+		PS = add_altern(PS)
+		print "add_altern con 0.1" + str(PS)
 		exit(-1)
-		children = crossover_population(parents)
+		
 		
 		
 
@@ -121,7 +156,9 @@ def main():
 			parser.print_help()
 			exit(-1)
 	#ejemplos = encode(opts.file_name)
+	global rule_size 
 	ejemplos = ['10101', '10011', '01101', '01010']
+	rule_size = len(ejemplos[0])
 	GA(ejemplos, opts.p, opts.r, opts.m)
 	
 	
