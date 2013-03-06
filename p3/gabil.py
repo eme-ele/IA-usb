@@ -1,4 +1,5 @@
 import optparse
+import random
 
 # una hip siempre es una sola regla 
 
@@ -7,7 +8,6 @@ def parse_file(file_name):
 
 def encode(example):
 	pass
-
 
 def correct_square(hipotesis, ejemplos):
 	size = len(hipotesis)
@@ -30,18 +30,26 @@ def get_total_fit(fitness_list):
 		total_fitness += f
 	return total_fitness
 		
-def probabilidad(h_i):
-	return fitness_list(h_i)/total_fitness
+def probabilidades(P, total_fitness):
+	prob_list = []
+	for i in range(P):
+		prob_list.append((fitness_list[i]/total_fitness, i))
+	return prob_list.sort()
 
-def select_rueda_ruleta(P,n):
-	
+def select_rueda_ruleta(P, n, total_fitness):
+	PS = []
+	Pr = probabilidades(P, get_total_fit(fitness_list))
+	for i in range(n):
+		PS.append(P[Pr[i][1]])
+	return PS		
+
 
 def GA(ejemplos, p, r, m):
-	P = poblacion(ejemplos, p)
+	P = poblacion(len(ejemplos[0]), p)
 	fitness_list = compute_fitness(P)
 	while(1):
-		n = (1-r)*p
-		PS = select_rueda_ruleta(P, n)
+		n = int((1-r)*p)
+		PS = select_rueda_ruleta(P, n, get_total_fit(fitness_list))
 		
 		
 
