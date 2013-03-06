@@ -66,16 +66,29 @@ def select_rueda_ruleta(P, n, total_fitness, fitness_list):
 	return PS			
 
 
-def crossover(parents):
-	for i in range(0, len(parents), 2):
-		# puntos random a
-		p1_a = random.randint(0, len(parents[i]))
-		p1_b = random.randint(0, len(parents[i]))
-		# calcula distancias a comienzo de la regla
-		d1 = math.ceil(p1_a/rule_size)*rule_size - p1_a
-		d2 = math.ceil(p1_b/rule_size)*rule_size - p1_b
-		# puntos random b
-		
+def crossover(individuo1,individuo2):
+	point_1 = 1
+	point_2 = -1
+	#Crea 2 puntos aleatorios de 2 coordenadas, donde se indica la regla y la casilla respecto a la regla
+	while point_1 >= point_2:
+		point_1 = (random.randint(0,len(individuo1)/rule_size -1),random.randint(0,rule_size))
+		point_2 = (random.randint(0,len(individuo1)/rule_size -1),random.randint(0,rule_size))
+	point_3 = 1
+	point_4 = -1
+	while point_4 <= point_3:
+		point_3 = [random.randint(0,len(individuo2)/rule_size-1),point_1[1]]
+		point_4 = [random.randint(0,len(individuo2)/rule_size-1),point_2[1]]
+	#print [point_1,point_2]
+	#print [point_3,point_4]
+	son1 = individuo1[:point_1[0]*rule_size+point_1[1]] + individuo2[point_3[0]*rule_size+point_3[1]:point_4[0]*rule_size+point_4[1]] + individuo1[point_2[0]*rule_size+point_2[1]:] 
+	son2 = individuo2[:point_3[0]*rule_size+point_3[1]] + individuo1[point_1[0]*rule_size+point_1[1]:point_2[0]*rule_size+point_2[1]] + individuo2[point_4[0]*rule_size+point_4[1]:] 
+	return [son1,son2]
+
+def crossover_population(parents):
+	offspring = []
+	for i in range(0,len(parents),2):
+		offspring.extend(crossover(parents(i),parents(i+1),rule_size))
+	return offspring
 
 
 def GA(ejemplos, p, r, m):
