@@ -1,7 +1,10 @@
 import optparse
 import random
+import math
 
 # una hip siempre es una sola regla 
+
+global rule_size = 5
 
 def parse_file(file_name):
 	pass
@@ -60,7 +63,19 @@ def select_rueda_ruleta(P, n, total_fitness, fitness_list):
 	Pr = probabilidades(P, total_fitness, fitness_list)
 	for i in range(n):
 		PS.append(P[Pr[i][1]])
-	return PS		
+	return PS			
+
+
+def crossover(parents):
+	for i in range(0, len(parents), 2):
+		# puntos random a
+		p1_a = random.randint(0, len(parents[i]))
+		p1_b = random.randint(0, len(parents[i]))
+		# calcula distancias a comienzo de la regla
+		d1 = math.ceil(p1_a/rule_size)*rule_size - p1_a
+		d2 = math.ceil(p1_b/rule_size)*rule_size - p1_b
+		# puntos random b
+		
 
 
 def GA(ejemplos, p, r, m):
@@ -72,7 +87,11 @@ def GA(ejemplos, p, r, m):
 		n = int(round((1-r)*p))
 		PS = select_rueda_ruleta(P, n, get_total_fit(fitness_list), fitness_list)
 		print "PS: "+ str(PS)
+		n = int(round(r*p))
+		parents = select_rueda_ruleta(P, n, get_total_fitness(fitness_list), fitness_list)
+		print "To be crossed: " + str(Cross)
 		exit(-1)
+		children = crossover(parents)
 		
 		
 
