@@ -43,6 +43,19 @@ def bin_to_list(binary,datos):
 	return lista
 
 
+def mask_matrix(bin_rule,datos):
+	lista = bin_to_list(bin_rule,datos)
+	matrix = []
+	for x in range(16):
+		new = ""
+		for y in range(16):
+			if x==y:
+				new += '1'*len(lista[y])
+			else:
+				new += '0'*len(lista[y])
+		matrix.append(new)
+	return matrix
+
 #DICCIONARIO DE TERMINOS
 
 A1 = dict({"b" : "0", "a" : "1"})
@@ -113,6 +126,10 @@ def test():
 	print features
 	print decode(features,datos)
 	print mutation("000111000111000111")
+	m = mask_matrix(binary,datos)
+	for x in m:
+		print x
+
 
 '''def crossover(individuo1,individuo2,rule_size):
 	point_1 = 1
