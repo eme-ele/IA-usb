@@ -4,7 +4,6 @@ import math
 
 # una hip siempre es una sola regla 
 
-global rule_size = 5
 
 def parse_file(file_name):
 	pass
@@ -104,7 +103,7 @@ def GA(ejemplos, p, r, m):
 		parents = select_rueda_ruleta(P, n, get_total_fitness(fitness_list), fitness_list)
 		print "To be crossed: " + str(Cross)
 		exit(-1)
-		children = crossover(parents)
+		children = crossover_population(parents)
 		
 		
 
