@@ -115,7 +115,7 @@ def crossover_population(parents):
 
 	for i in range(0,len(parents),2):
 		offspring.extend(crossover(parents[i],parents[i+1]))
-	if len()
+	#if len()
 	return offspring
 
 def mutation(individuo):
