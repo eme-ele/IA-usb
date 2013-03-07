@@ -55,14 +55,24 @@ def probabilidades(P, total_fitness, fitness_list):
 			prob = fitness_list[i]/total_fitness
 		pair = (prob, i)
 		prob_list.append(pair)
-	return sorted(prob_list)	
+	return sorted(prob_list,reverse=True)	
 
-def select_rueda_ruleta(P, n, total_fitness, fitness_list):
+def weel_select(P, n, total_fitness, fitness_list):
 	PS = []
 	Pr = probabilidades(P, total_fitness, fitness_list)
 	for i in range(n):
-		PS.append(P[Pr[i][1]])
+		lanzamiento = random.random()
+		circle = 0
+		for e in range(len(PS)):
+			circle += P[Pr[i][0]]
+			if lanzamiento <= circle
+				PS.append(P[Pr[i][1]])
 	return PS			
+
+
+def tournament_select(P, n, total_fitness, fitness_list):
+	pass
+	
 
 
 def crossover(individuo1,individuo2):
@@ -92,6 +102,16 @@ def crossover_population(parents):
 def mutation(individuo):
 	point = random.randint(0,len(individuo)-1)
 	return individuo[:point] + str(int(not int(individuo[point]))) + individuo[point+1:]
+
+
+def mutate_population(PS,r):
+	number = round(PS*r)
+	PS_shuffle = random.shuffle(PS)
+	
+	for individuo in range(number):
+		PS_shuffle[individuo] = mutation(PS_shuffle[individuo])
+	return PS_shuffle
+
 
 def make_mask(pos, length):
 	mask = ''

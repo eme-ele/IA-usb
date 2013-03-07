@@ -114,6 +114,15 @@ def mutation(individuo):
 	return individuo[:point] + str(int(not int(individuo[point]))) + individuo[point+1:]
 	
 
+
+def mutate_population(PS,r):
+	number = round(PS*r)
+	PS_shuffle = random.shuffle(PS)
+	
+	for individuo in range(number):
+		PS_shuffle[individuo] = mutation(PS_shuffle[individuo])
+	return PS_shuffle
+
 def test():
 	ejemplo = ['b',41.92,0.42,'u','g','c','h',0.21,'t','t',6,'f','g',220,948,'+']
 	datos = [0,[30,60,3000],[0,1,1000],0,0,0,0,[0,1,1000],0,0,[0,10,2000],0,0,[200,300,1000],[900,1000,10000],0]
@@ -129,6 +138,16 @@ def test():
 	m = mask_matrix(binary,datos)
 	for x in m:
 		print x
+
+def rueda_ruleta(probabilities):
+	prob.sort(reverse=True)
+	lanzamiento = random.random()
+	circle = 0
+	for elem in range(prob):
+		circle+=prom[elem]
+		if lanzamiento <= circle:
+			return elem 
+
 
 
 '''def crossover(individuo1,individuo2,rule_size):
