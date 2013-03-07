@@ -65,7 +65,7 @@ def weel_select(P, n, total_fitness, fitness_list):
 		circle = 0
 		for e in range(len(PS)):
 			circle += P[Pr[i][0]]
-			if lanzamiento <= circle
+			if lanzamiento <= circle:
 				PS.append(P[Pr[i][1]])
 	return PS			
 
@@ -138,6 +138,17 @@ def add_altern(PS):
 		altern_PS.append(hipotesis)
 	return altern_PS
 
+def drop_cond(PS):
+	drop_PS = []
+	for hipotesis in PS:
+		# probabilidad 0.6
+		if(random.randint(1,100) <= 60):
+			# escoger un atributo aleatorio para droppear
+			mask = mask_atributos[random.randint(0, len(mask_atributos)-1)]
+			dropped_hip = bin(int(hipotesis,2) | int(mask, 2))
+			hipotesis = complete_bin(rule_size, altern_bin[2:])
+		drop_PS.append(hipotesis)
+	return drop_PS
 
 
 def GA(ejemplos, p, r, m):
@@ -147,16 +158,18 @@ def GA(ejemplos, p, r, m):
 	fitness_list = compute_fitness(P, ejemplos)
 	while(1):
 		n = int(round((1-r)*p))
-		PS = select_rueda_ruleta(P, n, get_total_fit(fitness_list), fitness_list)
+		PS = weel_select(P, n, get_total_fit(fitness_list), fitness_list)
 		print "PS: "+ str(PS)
 		n = int(round(r*p))
-		parents = select_rueda_ruleta(P, n, get_total_fit(fitness_list), fitness_list)
+		parents = weel_select(P, n, get_total_fit(fitness_list), fitness_list)
 		print "To be crossed: " + str(parents)
 		#offspring = crossover_population(parents)
 		PS = PS + crossover_population(parents)
 		print "PS: "+str(PS)
 		PS = add_altern(PS)
-		print "add_altern con 0.1" + str(PS)
+		print "add_altern con 0.01" + str(PS)
+		PS = drop_cond(PS)
+		print "drop_cond con 0.6" + str(PS)
 		exit(-1)
 		
 		
@@ -176,9 +189,12 @@ def main():
 			parser.print_help()
 			exit(-1)
 	#ejemplos = encode(opts.file_name)
-	global rule_size 
+	global rule_size, mask_atributos
+	# luego hay que cambiarlos para los ejemplos dados
 	ejemplos = ['10101', '10011', '01101', '01010']
-	rule_size = len(ejemplos[0])
+	rule_size = 5
+	mask_atributos = ['11000', '00110']
+
 	GA(ejemplos, opts.p, opts.r, opts.m)
 	
 	
