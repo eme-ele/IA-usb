@@ -60,13 +60,28 @@ def probabilidades(P, total_fitness, fitness_list):
 def weel_select(P, n, total_fitness, fitness_list):
 	PS = []
 	Pr = probabilidades(P, total_fitness, fitness_list)
+	#print P
+	#print total_fitness
+	#print fitness_list
+	#print Pr
+	#print "\n\n\n\n"
 	for i in range(n):
+
 		lanzamiento = random.random()
 		circle = 0
-		for e in range(len(PS)):
-			circle += P[Pr[i][0]]
+		#print len(PS)
+		#print "El lanzamiento fue de:" + str(lanzamiento)
+		#print i
+		for e in range(len(Pr)):
+			circle += Pr[e][0]
+			#print " 	Es menor que " + str(circle) + " ?"
 			if lanzamiento <= circle:
-				PS.append(P[Pr[i][1]])
+				PS.append(P[Pr[e][1]])
+				#Pr.remove(Pr[e])
+				break
+			#print " 	No por ahora"
+	#print PS
+	#exit(-1)
 	return PS			
 
 
@@ -95,8 +110,12 @@ def crossover(individuo1,individuo2):
 
 def crossover_population(parents):
 	offspring = []
+	if len(parents) == 1:
+		return parents
+
 	for i in range(0,len(parents),2):
 		offspring.extend(crossover(parents[i],parents[i+1]))
+	if len()
 	return offspring
 
 def mutation(individuo):
@@ -158,13 +177,15 @@ def GA(ejemplos, p, r, m):
 	fitness_list = compute_fitness(P, ejemplos)
 	while(1):
 		n = int(round((1-r)*p))
+		#print "weel_select(" + str(P ) + ", " +  str(n) +", "+ str(get_total_fit(fitness_list)) + ", " + str(fitness_list) + ")"
 		PS = weel_select(P, n, get_total_fit(fitness_list), fitness_list)
 		print "PS: "+ str(PS)
-		n = int(round(r*p))
+		n = p - n
 		parents = weel_select(P, n, get_total_fit(fitness_list), fitness_list)
 		print "To be crossed: " + str(parents)
-		#offspring = crossover_population(parents)
-		PS = PS + crossover_population(parents)
+		offspring = crossover_population(parents)
+		print "New offspring: " + str(offspring)
+		PS = PS + offspring
 		print "PS: "+str(PS)
 		PS = add_altern(PS)
 		print "add_altern con 0.01" + str(PS)
