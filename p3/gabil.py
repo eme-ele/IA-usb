@@ -2,8 +2,6 @@ import optparse
 import random
 import math
 
-# una hip siempre es una sola regla 
-
 
 def parse_file(file_name):
 	pass
@@ -136,7 +134,6 @@ def mutation(individuo):
 def mutate_population(PS,r):
 	number = int(round(len(PS)*r))
 	PS_shuffle = random.shuffle(PS)
-	print PS
 	for individuo in range(number):
 		PS[individuo] = mutation(PS[individuo])
 	
@@ -161,9 +158,10 @@ def add_altern(PS):
 			for i in range(len(hipotesis)-1):
 				if hipotesis[i] == '0':
 					cero_pos.append(i)
-			mask = make_mask(cero_pos[random.randint(0, len(cero_pos)-1)], len(hipotesis))
-			altern_bin =  bin(int(hipotesis,2) | int(mask, 2))
-			hipotesis = complete_bin(rule_size, altern_bin[2:])
+			if (len(cero_pos)>0):
+				mask = make_mask(cero_pos[random.randint(0, len(cero_pos)-1)], len(hipotesis))
+				altern_bin =  bin(int(hipotesis,2) | int(mask, 2))
+				hipotesis = complete_bin(rule_size, altern_bin[2:])
 		altern_PS.append(hipotesis)
 	return altern_PS
 
@@ -185,25 +183,31 @@ def GA(ejemplos, p, r, m):
 	P = poblacion(len(ejemplos[0]), p)
 	print "P: " + str(P)
 	fitness_list = compute_fitness(P, ejemplos)
-	while(1):
+	print "fitness: " + str(fitness_list)	
+	iter = 0
+	while( iter < 100):
 		n = int(round((1-r)*p))
-		#print "weel_select(" + str(P ) + ", " +  str(n) +", "+ str(get_total_fit(fitness_list)) + ", " + str(fitness_list) + ")"
 		PS = weel_select(P, n, get_total_fit(fitness_list), fitness_list)
-		print "PS weel: "+ str(PS)
+		#print "PS weel: "+ str(PS)
 		n = p - n
 		parents = tournament_select(P, n, get_total_fit(fitness_list), fitness_list)
-		print "Parents tournament: " + str(parents)
+		#print "Parents tournament: " + str(parents)
 		offspring = crossover_population(parents)
-		print "New offspring: " + str(offspring)
+		#print "New offspring: " + str(offspring)
 		PS = PS + offspring
-		print "PS: "+str(PS)
+		#print "PS: "+str(PS)
 		mutate_population(PS,m)
-		print "PS after mutation: " + str(PS)
+		#print "PS after mutation: " + str(PS)
 		PS = add_altern(PS)
-		print "add_altern con 0.01" + str(PS)
+		#print "add_altern con 0.01" + str(PS)
 		PS = drop_cond(PS)
-		print "drop_cond con 0.6" + str(PS)
-		exit(-1)
+		#print "drop_cond con 0.6" + str(PS)
+		P = PS
+		print "P: " + str(P)
+		fitness_list = compute_fitness(P, ejemplos)
+		print "fitness: " + str(fitness_list)
+		iter += 1
+
 		
 		
 		
