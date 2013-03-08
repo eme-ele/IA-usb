@@ -86,8 +86,18 @@ def weel_select(P, n, total_fitness, fitness_list):
 
 
 def tournament_select(P, n, total_fitness, fitness_list):
-	pass
-	
+	k = 2
+	PS = []
+	best = 0.0
+	choice_index = 0
+	for i in range(n):
+		for j in range(k):
+			index = random.randint(0, len(fitness_list)-1)
+			if (fitness_list[index] > best):
+				best = fitness_list[index]
+				choice_index = index
+		PS.append(P[choice_index])
+	return PS
 
 
 def crossover(individuo1,individuo2):
@@ -165,7 +175,7 @@ def drop_cond(PS):
 			# escoger un atributo aleatorio para droppear
 			mask = mask_atributos[random.randint(0, len(mask_atributos)-1)]
 			dropped_hip = bin(int(hipotesis,2) | int(mask, 2))
-			hipotesis = complete_bin(rule_size, altern_bin[2:])
+			hipotesis = complete_bin(rule_size, dropped_hip[2:])
 		drop_PS.append(hipotesis)
 	return drop_PS
 
@@ -179,10 +189,10 @@ def GA(ejemplos, p, r, m):
 		n = int(round((1-r)*p))
 		#print "weel_select(" + str(P ) + ", " +  str(n) +", "+ str(get_total_fit(fitness_list)) + ", " + str(fitness_list) + ")"
 		PS = weel_select(P, n, get_total_fit(fitness_list), fitness_list)
-		print "PS: "+ str(PS)
+		print "PS weel: "+ str(PS)
 		n = p - n
-		parents = weel_select(P, n, get_total_fit(fitness_list), fitness_list)
-		print "To be crossed: " + str(parents)
+		parents = tournament_select(P, n, get_total_fit(fitness_list), fitness_list)
+		print "Parents tournament: " + str(parents)
 		offspring = crossover_population(parents)
 		print "New offspring: " + str(offspring)
 		PS = PS + offspring
