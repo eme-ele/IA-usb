@@ -134,12 +134,12 @@ def mutation(individuo):
 
 
 def mutate_population(PS,r):
-	number = round(PS*r)
+	number = int(round(len(PS)*r))
 	PS_shuffle = random.shuffle(PS)
-	
+	print PS
 	for individuo in range(number):
-		PS_shuffle[individuo] = mutation(PS_shuffle[individuo])
-	return PS_shuffle
+		PS[individuo] = mutation(PS[individuo])
+	
 
 
 def make_mask(pos, length):
@@ -197,6 +197,8 @@ def GA(ejemplos, p, r, m):
 		print "New offspring: " + str(offspring)
 		PS = PS + offspring
 		print "PS: "+str(PS)
+		mutate_population(PS,m)
+		print "PS after mutation: " + str(PS)
 		PS = add_altern(PS)
 		print "add_altern con 0.01" + str(PS)
 		PS = drop_cond(PS)
