@@ -1,4 +1,5 @@
 import random
+from gabil import *
 
 # En esta funcion entra el numero binario sin el antecedente "0b" que llevan normalmente los resultantes de la funcion bin()
 def complete_bin(size,binario):
@@ -13,14 +14,21 @@ def complete_bin(size,binario):
 
 
 def continue_clasification(lim_inf, lim_sup, div, value):
-	size = len(bin(div)[2:])
+	size = len(bin(div)[1:])
 	step = (lim_sup - lim_inf)/float(div)
 	#print div
+	if value == "?":
+		return "1"*size
 	for x in range(1,2**size):
-		if value < lim_inf + step*x:
+		#print "value: " + str(value) + "< limite inferior + step*x" + str(lim_inf + step*x)
+		
+		next = lim_inf+step*x
+		if float(value) < float(next):
 			return complete_bin(size,bin(x-1)[2:])
 
 def continue_reversion(lim_inf, lim_sup, div, value):
+	if value[0] == "1":
+		return "?"
 	part = int(value,2)
 	step = (lim_sup - lim_inf)/float(div)
 	return round(lim_inf + step*part,2)
@@ -58,18 +66,17 @@ def mask_matrix(bin_rule,datos):
 
 #DICCIONARIO DE TERMINOS
 
-A1 = dict({"b" : "0", "a" : "1"})
-A4 = dict({"u":"00", "y":"01", "l":"10", "t":"11"})
-A5 = dict({"g":"00", "p":"01", "gg":"10"})
-A6 = dict({"c":"0000", "d":"0001", "cc":"0010", "i":"0011", "j":"0100", "k":"0101", "m":"0110", "r":"0111", "q":"1000", "w":"1001", "x":"1010", "e":"1011", "aa":"1100", "ff":"1101"})
-A7 = dict({"v":"0000", "h":"0001", "bb":"0010", "j":"0011", "n":"0100", "z":"0101", "dd":"0110", "ff":"0111", "o":"1000"})
-A9 = dict({"t":"0", "f":"1"})
-A10 = dict({"t":"0", "f":"1"})
-A12 = dict({"t":"0", "f":"1"})
-A13 = dict({"g":"00", "p":"01", "s":"10"})
-A16 = dict({"-":"0", "+":"1"})
+A1 = dict({"b" : "00", "a" : "01", "?" : "10"})
+A4 = dict({"u":"000", "y":"001", "l":"010", "t":"011", "?" : "001"})
+A5 = dict({"g":"00", "p":"01", "gg":"10", "?" : "11"})
+A6 = dict({"c":"0000", "d":"0001", "cc":"0010", "i":"0011", "j":"0100", "k":"0101", "m":"0110", "r":"0111", "q":"1000", "w":"1001", "x":"1010", "e":"1011", "aa":"1100", "ff":"1101", "?" : "1110"})
+A7 = dict({"v":"0000", "h":"0001", "bb":"0010", "j":"0011", "n":"0100", "z":"0101", "dd":"0110", "ff":"0111", "o":"1000", "?" : "1001"})
+A9 = dict({"t":"00", "f":"01", "?" : "10"})
+A10 = dict({"t":"00", "f":"01", "?" : "10"})
+A12 = dict({"t":"00", "f":"01", "?" : "10"})
+A13 = dict({"g":"00", "p":"01", "s":"10", "?" : "11"})
+A16 = dict({"-":"00", "+":"01", "?" : "10"})
 dictionary = [A1,0,0,A4,A5,A6,A7,0,A9,A10,0,A12,A13,0,0,A16]
-
 
 def encode(features, data):
 	if len(features)!=16:
@@ -86,18 +93,34 @@ def encode(features, data):
 			exit(-1)
 	return binary
 
+def encode_population(population,data):
+	bin_pop = []
+	for p in population:
+		bin_pop.append(encode(p,data))
+	return bin_pop
+
+
 
 def decode(features,data):
 	lista = []
 	for x in range(16):
 		if dictionary[x]:
 			for key,value in dictionary[x].items():
-				if value == features[x]:
+				if value == features[:len(value)]:
+					features = features[len(value):]
 					lista.append(key)
 					break
 		else:
-			lista.append(continue_reversion(data[x][0],data[x][1],data[x][2],features[x]))
+			lista.append(continue_reversion(data[x][0],data[x][1],data[x][2],features[:len(bin(data[x][2])[1:])]))
+			features = features[ len( bin( data[x][2] )[1:] ) :]
 	return lista
+
+def decode_population(population,data):
+	feat_pop = []
+	for p in population:
+		feat_pop.append(decode(p,data))
+	return feat_pop
+
 
 def random_binary(tam):
 	res = ""
@@ -108,20 +131,6 @@ def random_binary(tam):
 			res = res + "0"
 	return res
 
-
-def mutation(individuo):
-	point = random.randint(0,len(individuo)-1)
-	return individuo[:point] + str(int(not int(individuo[point]))) + individuo[point+1:]
-	
-
-
-def mutate_population(PS,r):
-	number = round(PS*r)
-	PS_shuffle = random.shuffle(PS)
-	
-	for individuo in range(number):
-		PS_shuffle[individuo] = mutation(PS_shuffle[individuo])
-	return PS_shuffle
 
 def test():
 	ejemplo = ['b',41.92,0.42,'u','g','c','h',0.21,'t','t',6,'f','g',220,948,'+']
@@ -139,48 +148,7 @@ def test():
 	for x in m:
 		print x
 
-def rueda_ruleta(probabilities):
-	prob.sort(reverse=True)
-	lanzamiento = random.random()
-	circle = 0
-	for elem in range(prob):
-		circle+=prom[elem]
-		if lanzamiento <= circle:
-			return elem 
-
-
-
-'''def crossover(individuo1,individuo2,rule_size):
-	point_1 = 1
-	point_2 = -1
-	#Crea 2 puntos aleatorios de 2 coordenadas, donde se indica la regla y la casilla respecto a la regla
-	while point_1 >= point_2:
-		point_1 = (random.randint(0,len(individuo1)/rule_size -1),random.randint(0,rule_size))
-		point_2 = (random.randint(0,len(individuo1)/rule_size -1),random.randint(0,rule_size))
-	point_3 = 1
-	point_4 = -1
-	while point_4 <= point_3:
-		point_3 = [random.randint(0,len(individuo2)/rule_size-1),point_1[1]]
-		point_4 = [random.randint(0,len(individuo2)/rule_size-1),point_2[1]]
-	print [point_1,point_2]
-	print [point_3,point_4]
-	son1 = individuo1[:point_1[0]*rule_size+point_1[1]] + individuo2[point_3[0]*rule_size+point_3[1]:point_4[0]*rule_size+point_4[1]] + individuo1[point_2[0]*rule_size+point_2[1]:] 
-	son2 = individuo2[:point_3[0]*rule_size+point_3[1]] + individuo1[point_1[0]*rule_size+point_1[1]:point_2[0]*rule_size+point_2[1]] + individuo2[point_4[0]*rule_size+point_4[1]:] 
-	return [son1,son2]'''
-	
-
 
 if __name__ == '__main__':
-
-
-
 	test()
-	#x,y = crossover('111111111111111111111111111111111111111111111111', '000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',48)
-	#print x
-	#print y
 	
-
-
-
-
-

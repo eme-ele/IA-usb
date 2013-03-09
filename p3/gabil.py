@@ -1,7 +1,7 @@
 import optparse
 import random
 import math
-
+from encode import *
 
 def parse_file(file_name):
 	pass
@@ -209,8 +209,38 @@ def GA(ejemplos, p, r, m):
 		iter += 1
 
 		
+def read_population(file_name):
+	f = open(file_name)
+	content = f.read()
+	lista = content.split("\n")
+	population = []
+	for l in lista:
+		population.append(l.split(","))
+	return population
+
+
+def create_data(population,div):
+	#[0,[30,60,3000],[0,1,1000],0,0,0,0,[0,1,1000],0,0,[0,10,2000],0,0,[200,300,1000],[900,1000,10000],0]
+	data = []
+	div_list = [0,div[0],div[1],0,0,0,0,div[2],0,0,div[3],0,0,div[4],div[5],0]
+	for b in range(len(div_list)):
+		if div_list[b]:
+			temp = []
+			for p in population:
+				if p[b] != "?":
+					temp.append(float(p[b]))
+			data.append([min(temp),max(temp),div_list[b]])
+		else:
+			data.append(0)
+	#for row in range(len(data)):
 		
-		
+
+	return data
+
+
+
+	
+
 
 def main():
 	parser = optparse.OptionParser()
@@ -232,6 +262,12 @@ def main():
 	rule_size = 5
 	mask_atributos = ['11000', '00110']
 
+	population = read_population(opts.file_name)
+	#data debe crearse con un vector de numero de intervalos... cada uno representaria el numero de divisiones del elemento i del rasgo continuo
+	data = create_data(population,[1000,1000,1000,1000,1000,10000])
+	ejemplos = encode_population(population,data)
+
+	back_population = decode_population(ejemplos,data)
 	GA(ejemplos, opts.p, opts.r, opts.m)
 	
 	
