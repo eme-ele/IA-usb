@@ -237,8 +237,6 @@ def create_data(population,div):
 
 	return data
 
-
-
 	
 
 
