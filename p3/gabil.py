@@ -179,7 +179,7 @@ def drop_cond(PS):
 
 
 def GA(ejemplos, p, r, m):
-	print "ejemplos: " + str(ejemplos)
+	#print "ejemplos: " + str(ejemplos)
 	P = poblacion(len(ejemplos[0]), p)
 	print "P: " + str(P)
 	fitness_list = compute_fitness(P, ejemplos)
@@ -211,11 +211,10 @@ def GA(ejemplos, p, r, m):
 		
 def read_population(file_name):
 	f = open(file_name)
-	content = f.read()
-	lista = content.split("\n")
 	population = []
-	for l in lista:
-		population.append(l.split(","))
+	for linea in f:
+		if linea.strip() != '':
+			population.append(linea.strip().split(","))
 	return population
 
 
@@ -256,14 +255,13 @@ def main():
 	#ejemplos = encode(opts.file_name)
 	global rule_size, mask_atributos
 	# luego hay que cambiarlos para los ejemplos dados
-	ejemplos = ['10101', '10011', '01101', '01010']
-	rule_size = 5
-	mask_atributos = ['11000', '00110']
 
 	population = read_population(opts.file_name)
 	#data debe crearse con un vector de numero de intervalos... cada uno representaria el numero de divisiones del elemento i del rasgo continuo
 	data = create_data(population,[1000,1000,1000,1000,1000,10000])
 	ejemplos = encode_population(population,data)
+	rule_size = len(ejemplos[0])
+	mask_atributos = ['11000', '00110']
 
 	back_population = decode_population(ejemplos,data)
 	GA(ejemplos, opts.p, opts.r, opts.m)
