@@ -259,8 +259,12 @@ def main():
 	population = read_population(opts.file_name)
 	#data debe crearse con un vector de numero de intervalos... cada uno representaria el numero de divisiones del elemento i del rasgo continuo
 	data = create_data(population,[1000,1000,1000,1000,1000,10000])
+	print population[0]
 	ejemplos = encode_population(population,data)
 	rule_size = len(ejemplos[0])
+	print ejemplos[0]
+	print rule_size
+	
 	mask_atributos = ['11000', '00110']
 
 	back_population = decode_population(ejemplos,data)
