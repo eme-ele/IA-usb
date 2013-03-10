@@ -13,19 +13,33 @@ def complete_bin(size,binario):
 	return binario
 
 def poblacion(string_len, p):
+	rule_limit = 20
 	P = []
 	for i in range(p):
-		rand = random.randint(0,2**string_len-1)
-		P.append(complete_bin(string_len, bin(rand)[2:]))
+		rule_numb = random.randint(1,rule_limit)
+		new_rule = ""
+		for x in range(rule_numb):
+			rand = random.randint(0,2**string_len-1)
+			new_rule += complete_bin(string_len, bin(rand)[2:])
+		P.append(new_rule)
+	
 	return P
 
 def correct_square(hipotesis, ejemplos):
 	size = len(hipotesis)
+	rules = [hipotesis[i:i+rule_size] for i in range(0,size,rule_size)]
 	correctos = 0
+	if len(rules) > 5:
+		return 0
 	for ex in ejemplos:
-		a = int(hipotesis[:size-2],2)
-		b = int(ex[:size-2],2)
-		correctos += (a&b == b) and (ex[size-1] == hipotesis[size-1])
+		right = 1
+		for rule in rules:
+			a = int(rule[:rule_size-1],2)
+			b = int(ex[:rule_size-1],2)
+			right = (a&b == b) and (ex[rule_size-1] == rule[rule_size-1])
+			if not right:
+				break
+		correctos += right
 	return correctos**2
 
 def compute_fitness(P, ejemplos):
@@ -53,8 +67,11 @@ def probabilidades(P, total_fitness, fitness_list):
 def weel_select(P, n, total_fitness, fitness_list):
 	PS = []
 	Pr = probabilidades(P, total_fitness, fitness_list)
+	sum = 0
+	for elem in Pr:
+		sum += elem[0]
 	for i in range(n):
-		lanzamiento = random.random()
+		lanzamiento = random.random()*sum
 		circle = 0
 		for e in range(len(Pr)):
 			circle += Pr[e][0]
@@ -80,18 +97,22 @@ def tournament_select(P, n, total_fitness, fitness_list):
 
 
 def crossover(individuo1,individuo2):
-	point_1 = 1
-	point_2 = -1
+	point_1 = [1,1]
+	point_2 = [1,-1]
 	#Crea 2 puntos aleatorios de 2 coordenadas, donde se indica la regla y la casilla respecto a la regla
-	while point_1 >= point_2:
-		point_1 = (random.randint(0,len(individuo1)/rule_size -1),random.randint(0,rule_size))
-		point_2 = (random.randint(0,len(individuo1)/rule_size -1),random.randint(0,rule_size))
+	rules_numb1 = len(individuo1)/rule_size
+	rules_numb2 = len(individuo2)/rule_size
+	while (rules_numb2 == 1 and point_1[1] >= point_2[1] and  point_1[0] >= point_2[0]) or (rules_numb2 > 1 and point_1 >= point_2):
+		point_1 = [random.randint(0,rules_numb1 -1),random.randint(0,rule_size)]
+		point_2  = [random.randint(0,rules_numb1 -1),random.randint(0,rule_size)]
 	point_3 = 1
 	point_4 = -1
 	while point_4 <= point_3:
-		point_3 = [random.randint(0,len(individuo2)/rule_size-1),point_1[1]]
-		point_4 = [random.randint(0,len(individuo2)/rule_size-1),point_2[1]]
+
+		point_3 = [random.randint(0,rules_numb2-1),point_1[1]]
+		point_4 = [random.randint(0,rules_numb2-1),point_2[1]]
 	son1 = individuo1[:point_1[0]*rule_size+point_1[1]] + individuo2[point_3[0]*rule_size+point_3[1]:point_4[0]*rule_size+point_4[1]] + individuo1[point_2[0]*rule_size+point_2[1]:] 
+
 	son2 = individuo2[:point_3[0]*rule_size+point_3[1]] + individuo1[point_1[0]*rule_size+point_1[1]:point_2[0]*rule_size+point_2[1]] + individuo2[point_4[0]*rule_size+point_4[1]:] 
 	return [son1,son2]
 
@@ -160,32 +181,41 @@ def drop_cond(PS):
 def GA(ejemplos, p, r, m):
 	#print "ejemplos: " + str(ejemplos)
 	P = poblacion(len(ejemplos[0]), p)
-	print "P: " + str(P)
+	#print "P: " + str(P)
 	fitness_list = compute_fitness(P, ejemplos)
 	print "fitness: " + str(fitness_list)	
 	iter = 0
-	while( iter < 100):
+	fitness_old = max(fitness_list)
+	fitness_new = -1
+	while(fitness_new != fitness_old or iter < 30):
+		fitness_old = fitness_new
 		n = int(round((1-r)*p))
+		#print n
 		PS = weel_select(P, n, get_total_fit(fitness_list), fitness_list)
-		#print "PS weel: "+ str(PS)
+		#print "Survivor: "+ str(PS)
 		n = p - n
-		parents = tournament_select(P, n, get_total_fit(fitness_list), fitness_list)
-		#print "Parents tournament: " + str(parents)
+		parents = weel_select(P, n, get_total_fit(fitness_list), fitness_list)
+		#print "Parents: " + str(parents)
 		offspring = crossover_population(parents)
 		#print "New offspring: " + str(offspring)
 		PS = PS + offspring
 		#print "PS: "+str(PS)
 		mutate_population(PS,m)
 		#print "PS after mutation: " + str(PS)
-		PS = add_altern(PS)
+		#PS = add_altern(PS)
 		#print "add_altern con 0.01" + str(PS)
-		PS = drop_cond(PS)
+		#PS = drop_cond(PS)
 		#print "drop_cond con 0.6" + str(PS)
 		P = PS
 		#print "P: " + str(P)
 		fitness_list = compute_fitness(P, ejemplos)
-		print "fitness: " + str(max(fitness_list))
+		fitness_new = max(fitness_list)
+		print "fitness "+ str(iter) + ":  " + str(fitness_new)
 		iter += 1
+	#r = P[fitness_list.index(fitness_new)]
+	#print r
+	#exit(-1)
+	return P[fitness_list.index(fitness_new)]
 
 		
 def read_population(file_name):
@@ -215,41 +245,51 @@ def create_data(population,div):
 
 	return data
 
+
+def train(opts):
+	population = read_population(opts.file_train)
+	ejemplos = encode_population(population,data)
+	global rule_size, mask_atributos
+	rule_size = len(ejemplos[0])
+	mask_atributos = mask_matrix(ejemplos[0],data)
+	return GA(ejemplos, opts.p, opts.r, opts.m)
+
+def test(file_name,hipotesis):
+	population = read_population(file_name)
+	ejemplos = encode_population(population,data)
+	return math.sqrt(correct_square(hipotesis,ejemplos))/float(len(ejemplos))
 	
+
 
 
 def main():
 	parser = optparse.OptionParser()
-	parser.add_option('-f', help='archivo de ejemplos', type='string', dest='file_name')
+	parser.add_option('-e', help='archivo de entrenamiento', type='string', dest='file_train')
+	parser.add_option('-t', help='archivo de prueba', type='string', dest='file_test')
 	parser.add_option('-p', help='tamano de la poblacion', type='int', dest='p')
 	parser.add_option('-r', help='fraccion de la pobl a reemplazarse en crossover', type='float', dest='r')
 	parser.add_option('-m', help='tasa de mutacion', type='float', dest='m')
 	(opts, args) = parser.parse_args()
-	mandatories = ['file_name','p', 'r', 'm']
+	mandatories = ['file_train','file_test','p', 'r', 'm']
 	for m in mandatories:
 		if not opts.__dict__[m]:
 			print "Falta argumento obligatorio"
 			parser.print_help()
 			exit(-1)
+
+
+	#data debe crearse con un vector de numero de intervalos. Cada uno representaria el numero de divisiones del elemento i del rasgo continuo
+	div = 26
+	global data
+	data = [0,[13.75,80.25,div],[0,28,div],0,0,0,0,[0,28.5,div],0,0,[0,67,div],0,0,[0,2000,div],[0,100000,div],0]
 	#ejemplos = encode(opts.file_name)
-	global rule_size, mask_atributos
+	#global rule_size, mask_atributos
 	# luego hay que cambiarlos para los ejemplos dados
-	population = read_population(opts.file_name)
-	#data debe crearse con un vector de numero de intervalos... cada uno representaria el numero de divisiones del elemento i del rasgo continuo
-	div = int(math.ceil(math.sqrt(len(population))))
-	data = create_data(population,[div,div,div,div,div,div])
-	#print population[0]
-	ejemplos = encode_population(population,data)
-	rule_size = len(ejemplos[0])
-	#print ejemplos[0]
-	#print len(ejemplos[0])
-	mask_atributos = mask_matrix(ejemplos[0],data)
-	#print len(mask_atributos[0])
-	#print mask_atributos
-	back_population = decode_population(ejemplos,data)
-	GA(ejemplos, opts.p, opts.r, opts.m)
-	
-	
+	#rule_size = 0
+	hip = train(opts)
+	print hip
+
+	print test(opts.file_test,hip)
 
 
 if __name__ == "__main__":

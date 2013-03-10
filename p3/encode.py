@@ -12,7 +12,7 @@ A9 = dict({"t":"00", "f":"01", "?" : "10"})
 A10 = dict({"t":"00", "f":"01", "?" : "10"})
 A12 = dict({"t":"00", "f":"01", "?" : "10"})
 A13 = dict({"g":"00", "p":"01", "s":"10", "?" : "11"})
-A16 = dict({"-":"00", "+":"01", "?" : "10"})
+A16 = dict({"-":"0", "+":"1"})
 dictionary = [A1,0,0,A4,A5,A6,A7,0,A9,A10,0,A12,A13,0,0,A16]
 
 
@@ -24,10 +24,8 @@ def continue_clasification(lim_inf, lim_sup, div, value):
 	step = (lim_sup - lim_inf)/float(div)
 	if value == "?":
 		return "1"*size
-	for x in range(1,2**size):
-		next = lim_inf+step*x
-		if float(value) < float(next):
-			return complete_bin(size,bin(x-1)[2:])
+	clase = int((float(value) - lim_inf)/step)
+	return complete_bin(size,bin(clase)[2:])
 
 
 def encode(features, data):
@@ -66,7 +64,7 @@ def continue_reversion(lim_inf, lim_sup, div, value):
 def decode(features,data):
 	lista = []
 	features =  bin_to_list(features,data)
-	print features
+	
 	for x in range(16):
 		if dictionary[x]:
 			for key,value in dictionary[x].items():
@@ -75,8 +73,7 @@ def decode(features,data):
 					break
 		else:
 			lista.append(continue_reversion(data[x][0],data[x][1],data[x][2],features[x]))
-		print lista
-	exit(-1)
+		
 	return lista
 
 
@@ -128,6 +125,7 @@ def bin_to_list(binary,datos):
 
 
 def mask_matrix(bin_rule,datos):
+	#print len(bin_rule)
 	lista = bin_to_list(bin_rule,datos)
 	c = 0
 	matrix = []
@@ -139,12 +137,10 @@ def mask_matrix(bin_rule,datos):
 			else:
 				new += '0'*len(lista[y])
 		matrix.append(new)
+	#for m in matrix:
+	#	print len(m)
+	#exit(-1)
 	return matrix
-
-
-
-
-
 
 
 
