@@ -14,7 +14,7 @@ A13 = dict({"g":"00", "p":"01", "s":"10", "?" : "11"})
 A16 = dict({"-":"00", "+":"01", "?" : "10"})
 dictionary = [A1,0,0,A4,A5,A6,A7,0,A9,A10,0,A12,A13,0,0,A16]
 len_feat = [2,5,5,3,2,4,4,5,2,2,5,2,2,5,5,2]
-datos = [0,[30,60],[0,1],0,0,0,0,[0,1],0,0,[0,10],0,0,[200,300],[900,1000],0]
+datos = [0,[13.75,80.25],[0,28],0,0,0,0,[0,28.5],0,0,[0,67],0,0,[0,2000],[0,100000],0]
 
 
 def parse_file(filename):
@@ -35,14 +35,9 @@ def complete_bin(size,binario):
 
 
 def classify(lim_inf, lim_sup, value, div=26.0):
-	print "classifying: " + str(value)
 	size = 5
 	step = (lim_sup-lim_inf)/div
-	print "step: "+str(step)
-	if value == "?":
-		return "1"*size
 	clase = int((value-lim_inf)/step)
-	print clase
 	return complete_bin(size, bin(clase)[2:])
 		
 
@@ -52,7 +47,10 @@ def encode(example):
 		if dictionary[x]:
 			coding += dictionary[x][example[x]]
 		else:
-			coding += classify(datos[x][0], datos[x][1], example[x])	
+			if example[x] == '?':
+				coding += '1'*5
+			else:
+				coding += classify(datos[x][0], datos[x][1], float(example[x]))	
 	return coding
 
 def feat_mask():
