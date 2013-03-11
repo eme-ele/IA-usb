@@ -2,7 +2,7 @@ import optparse
 import random
 import math
 from encode import *
-
+import sys
 
 def complete_bin(size,binario):
 	original_size = len(binario)
@@ -13,7 +13,7 @@ def complete_bin(size,binario):
 	return binario
 
 def poblacion(string_len, p):
-	rule_limit = 20
+	rule_limit = 3
 	P = []
 	for i in range(p):
 		rule_numb = random.randint(1,rule_limit)
@@ -21,9 +21,14 @@ def poblacion(string_len, p):
 		for x in range(rule_numb):
 			rand = random.randint(0,2**string_len-1)
 			new_rule += complete_bin(string_len, bin(rand)[2:])
+		if len(new_rule)%60 !=0:
+			print "ERROR poblacion_aleatoria"
+			print "tamano: " + str(len(new_rule))
+			exit(-1)
 		P.append(new_rule)
 	
 	return P
+
 
 def correct_square(hipotesis, ejemplos):
 	size = len(hipotesis)
@@ -34,9 +39,19 @@ def correct_square(hipotesis, ejemplos):
 	for ex in ejemplos:
 		right = 1
 		for rule in rules:
-			a = int(rule[:rule_size-1],2)
-			b = int(ex[:rule_size-1],2)
-			right = (a&b == b) and (ex[rule_size-1] == rule[rule_size-1])
+			try:	
+				a = int(rule[:rule_size-1],2)
+				b = int(ex[:rule_size-1],2)
+				right = (a&b == b) and (ex[rule_size-1] == rule[rule_size-1])
+			except:
+				print "ERROR - correct_square"
+				print "Rules: " + str(rules)
+				print "Ejemplo: "+ str(ex)
+				print "Long de rule: " + str(len(rule))
+				print "Long de Ejemplo: " + str(len(ex))
+				print "Long de Hipotesis: " + str(len(hipotesis))
+				print "Rule_size: " + str(rule_size)
+				exit(-1)
 			if not right:
 				break
 		correctos += right
@@ -97,43 +112,60 @@ def tournament_select(P, n, total_fitness, fitness_list):
 
 
 def crossover(individuo1,individuo2):
-	point_1 = [1,1]
-	point_2 = [1,-1]
-	#Crea 2 puntos aleatorios de 2 coordenadas, donde se indica la regla y la casilla respecto a la regla
-	rules_numb1 = len(individuo1)/rule_size
-	rules_numb2 = len(individuo2)/rule_size
-	while (rules_numb2 == 1 and point_1[1] >= point_2[1] and  point_1[0] >= point_2[0]) or (rules_numb2 > 1 and point_1 >= point_2):
-		point_1 = [random.randint(0,rules_numb1 -1),random.randint(0,rule_size)]
-		point_2  = [random.randint(0,rules_numb1 -1),random.randint(0,rule_size)]
-	point_3 = 1
-	point_4 = -1
-	while point_4 <= point_3:
 
-		point_3 = [random.randint(0,rules_numb2-1),point_1[1]]
-		point_4 = [random.randint(0,rules_numb2-1),point_2[1]]
-	son1 = individuo1[:point_1[0]*rule_size+point_1[1]] + individuo2[point_3[0]*rule_size+point_3[1]:point_4[0]*rule_size+point_4[1]] + individuo1[point_2[0]*rule_size+point_2[1]:] 
+	#rule_size
+	while(True):
+		point_1 = random.randint(0,len(individuo1)-1)
+		point_2 = random.randint(point_1,len(individuo1)-1)
+		d1 = point_1%rule_size
+		d2 = point_2%rule_size
+		
+		if len(individuo2) != rule_size or d2>d1:
+			break
+	while(True):
+		point_3 = random.randint(0,len(individuo2)/rule_size - 1)*rule_size + d1
+		point_4 = random.randint(0,len(individuo2)/rule_size - 1)*rule_size + d2
+		if point_3<=point_4:
+			break
 
-	son2 = individuo2[:point_3[0]*rule_size+point_3[1]] + individuo1[point_1[0]*rule_size+point_1[1]:point_2[0]*rule_size+point_2[1]] + individuo2[point_4[0]*rule_size+point_4[1]:] 
+	son1 = individuo1[:point_1] + individuo2[point_3:point_4] + individuo1[point_2:]
+	son2 = individuo2[:point_3] + individuo1[point_1:point_2] + individuo2[point_4:]
+	if len(son1)%60 != 0:
+		print "ERROR crossover son1"
+		exit(-1)
+	if len(son2)%60 != 0:
+		print "ERROR crossover son2"
+		exit(-1)
+
+
 	return [son1,son2]
 
 def crossover_population(parents):
 	offspring = []
 	if len(parents) == 1:
-		return parents
-
-	for i in range(0,len(parents),2):
+		return offspring
+	l = len(parents)
+	if l%2 != 0:
+		l-=1
+	for i in range(0,l,2):
 		offspring.extend(crossover(parents[i],parents[i+1]))
 	#if len()
 	return offspring
 
 def mutation(individuo):
 	point = random.randint(0,len(individuo)-1)
-	return individuo[:point] + str(int(not int(individuo[point]))) + individuo[point+1:]
+	res = individuo[:point] + str(int(not int(individuo[point]))) + individuo[point+1:]
+	if len(res)%60 != 0:
+		print "ERROR mutation"
+		print individuo
+		print res
+		exit(-1)
+	return res
 
 
 def mutate_population(PS,r):
 	number = int(round(len(PS)*r))
-	PS_shuffle = random.shuffle(PS)
+	random.shuffle(PS)
 	for individuo in range(number):
 		PS[individuo] = mutation(PS[individuo])
 	
@@ -161,7 +193,13 @@ def add_altern(PS):
 			if (len(cero_pos)>0):
 				mask = make_mask(cero_pos[random.randint(0, len(cero_pos)-1)], len(hipotesis))
 				altern_bin =  bin(int(hipotesis,2) | int(mask, 2))
-				hipotesis = complete_bin(rule_size, altern_bin[2:])
+				hipotesis = complete_bin(len(hipotesis), altern_bin[2:])
+				if len(hipotesis)%60 != 0:
+					print "ERROR addicionar alternavo"
+					print len(hipotesis)
+					print len(mask)
+					print altern_bin
+					exit(-1)
 		altern_PS.append(hipotesis)
 	return altern_PS
 
@@ -170,52 +208,66 @@ def drop_cond(PS):
 	for hipotesis in PS:
 		# probabilidad 0.6
 		if(random.randint(1,100) <= 60):
+			rules = [hipotesis[i:i+rule_size] for i in range(0,size,rule_size)]
+			chosen_rule = random.randint(0, rules.size()-1)
 			# escoger un atributo aleatorio para droppear
 			mask = mask_atributos[random.randint(0, len(mask_atributos)-1)]
 			dropped_hip = bin(int(hipotesis,2) | int(mask, 2))
 			hipotesis = complete_bin(rule_size, dropped_hip[2:])
+			if len(hipotesis)%60 != 0:
+				print "ERROR drop_cond"
+				print len(hipotesis)
+				print len(mask)
+				print dropped_hip
+				exit(-1)
 		drop_PS.append(hipotesis)
 	return drop_PS
 
 
-def GA(ejemplos, p, r, m):
+def GA(ejemplos, p, r, m,weelPS,weelParent):
 	#print "ejemplos: " + str(ejemplos)
 	P = poblacion(len(ejemplos[0]), p)
 	#print "P: " + str(P)
 	fitness_list = compute_fitness(P, ejemplos)
-	print "fitness: " + str(fitness_list)	
+	#print "fitness: " + str(fitness_list)	
 	iter = 0
 	fitness_old = max(fitness_list)
 	fitness_new = -1
-	while(fitness_new != fitness_old or iter < 30):
+	while(fitness_new < 88209 and iter < 100):
 		fitness_old = fitness_new
 		n = int(round((1-r)*p))
 		#print n
-		PS = weel_select(P, n, get_total_fit(fitness_list), fitness_list)
+		if weelPS:
+			PS = weel_select(P, n, get_total_fit(fitness_list), fitness_list)
+		else:
+			PS = tournament_select(P, n, get_total_fit(fitness_list), fitness_list)
 		#print "Survivor: "+ str(PS)
 		n = p - n
-		parents = weel_select(P, n, get_total_fit(fitness_list), fitness_list)
+		if weelParent:
+			parents = weel_select(P, n, get_total_fit(fitness_list), fitness_list)
+		else:
+			parents = tournament_select(P, n, get_total_fit(fitness_list), fitness_list)
 		#print "Parents: " + str(parents)
 		offspring = crossover_population(parents)
 		#print "New offspring: " + str(offspring)
 		PS = PS + offspring
-		#print "PS: "+str(PS)
+		#print "PS:                " + str(PS)
 		mutate_population(PS,m)
 		#print "PS after mutation: " + str(PS)
-		#PS = add_altern(PS)
+		PS = add_altern(PS)
 		#print "add_altern con 0.01" + str(PS)
-		#PS = drop_cond(PS)
+		PS = drop_cond(PS)
 		#print "drop_cond con 0.6" + str(PS)
 		P = PS
 		#print "P: " + str(P)
 		fitness_list = compute_fitness(P, ejemplos)
 		fitness_new = max(fitness_list)
-		print "fitness "+ str(iter) + ":  " + str(fitness_new)
+		#sys.stdout.write("\r\rfitness "+ str(iter+1) + ":  " + str(fitness_new) + "\n")
 		iter += 1
 	#r = P[fitness_list.index(fitness_new)]
 	#print r
 	#exit(-1)
-	return P[fitness_list.index(fitness_new)]
+	return iter,P[fitness_list.index(fitness_new)],fitness_new
 
 		
 def read_population(file_name):
@@ -228,7 +280,6 @@ def read_population(file_name):
 
 
 def create_data(population,div):
-	#[0,[30,60,3000],[0,1,1000],0,0,0,0,[0,1,1000],0,0,[0,10,2000],0,0,[200,300,1000],[900,1000,10000],0]
 	data = []
 	div_list = [0,div[0],div[1],0,0,0,0,div[2],0,0,div[3],0,0,div[4],div[5],0]
 	for b in range(len(div_list)):
@@ -246,20 +297,19 @@ def create_data(population,div):
 	return data
 
 
-def train(opts):
+def train(opts,weelPS,weelParent):
 	population = read_population(opts.file_train)
 	ejemplos = encode_population(population,data)
 	global rule_size, mask_atributos
 	rule_size = len(ejemplos[0])
 	mask_atributos = mask_matrix(ejemplos[0],data)
-	return GA(ejemplos, opts.p, opts.r, opts.m)
+	return GA(ejemplos, opts.p, opts.r, opts.m,weelPS,weelParent)
 
 def test(file_name,hipotesis):
 	population = read_population(file_name)
 	ejemplos = encode_population(population,data)
 	return math.sqrt(correct_square(hipotesis,ejemplos))/float(len(ejemplos))
 	
-
 
 
 def main():
@@ -286,10 +336,31 @@ def main():
 	#global rule_size, mask_atributos
 	# luego hay que cambiarlos para los ejemplos dados
 	#rule_size = 0
-	hip = train(opts)
-	print hip
-
-	print test(opts.file_test,hip)
+	
+	for primer in range(2):
+		for segundo in range(2):
+			fitness_acum = 0.0
+			iter_acum = 0.0
+			accuracy_acum = 0.0		
+			print "Caso: " + str(primer*2 + segundo)
+			if primer:
+				print "		Weel PS"
+			else:
+				print "		Tournament PS"
+			if segundo:
+				print "		Weel Parents"
+			else:
+				print "		Tournament Parents"
+			for x in range(10):
+				it,hip,fitness = train(opts,primer,segundo)
+				print "Hipotesis Resultante: " + hip
+				accuracy_acum+= test(opts.file_test,hip)
+				fitness_acum+=fitness
+				iter_acum += it
+			print "Promedios:"
+			print "		Accuracy: 	" + str(accuracy_acum/10.0)
+			print "		Fitness:  	" + str(fitness_acum/10.0)
+			print "		Iteration:	" + str(iter_acum/10.0)
 
 
 if __name__ == "__main__":
