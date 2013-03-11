@@ -16,7 +16,7 @@ def poblacion(string_len, p):
 	rule_limit = 3
 	P = []
 	for i in range(p):
-		rule_numb = random.randint(1,rule_limit)
+		rule_numb = random.randint(2,rule_limit)
 		new_rule = ""
 		for x in range(rule_numb):
 			rand = random.randint(0,2**string_len-1)
@@ -208,12 +208,15 @@ def drop_cond(PS):
 	for hipotesis in PS:
 		# probabilidad 0.6
 		if(random.randint(1,100) <= 60):
+			size = len(hipotesis)
 			rules = [hipotesis[i:i+rule_size] for i in range(0,size,rule_size)]
-			chosen_rule = random.randint(0, rules.size()-1)
+			# escoger aleatoriamente la regla a modificar
+			chosen_rule = random.randint(0, len(rules)-1)
 			# escoger un atributo aleatorio para droppear
-			mask = mask_atributos[random.randint(0, len(mask_atributos)-1)]
+			att = random.randint(0, len(mask_atributos)-1)
+			mask = ((chosen_rule*rule_size)*'0') + mask_atributos[att] + (((len(rules)-1-chosen_rule)*rule_size)*'0')
 			dropped_hip = bin(int(hipotesis,2) | int(mask, 2))
-			hipotesis = complete_bin(rule_size, dropped_hip[2:])
+			hipotesis = complete_bin(size, dropped_hip[2:])
 			if len(hipotesis)%60 != 0:
 				print "ERROR drop_cond"
 				print len(hipotesis)
@@ -262,6 +265,7 @@ def GA(ejemplos, p, r, m,weelPS,weelParent):
 		#print "P: " + str(P)
 		fitness_list = compute_fitness(P, ejemplos)
 		fitness_new = max(fitness_list)
+		print str(iter)+": "+str(fitness_new)
 		#sys.stdout.write("\r\rfitness "+ str(iter+1) + ":  " + str(fitness_new) + "\n")
 		iter += 1
 	#r = P[fitness_list.index(fitness_new)]
