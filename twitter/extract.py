@@ -3,39 +3,48 @@ import sqlite3
 import optparse
 import time
 
+
 def create_tables():
-	# telefonias
-	try:
-		cur.execute("CREATE TABLE digitel (date text, user text, user_id int, tweet_id int, text text)")
-		cur.execute("CREATE TABLE movistar (date text, user text, user_id int, tweet_id int, text text)")
-		cur.execute("CREATE TABLE movilnet (date text, user text, user_id int, tweet_id int, text text)")
-	except:
-		return
-	# tweets generales 
-	#cur.execute("CREATE TABLE random (date text, user text, user_id int, tweet_id int, text text)")
-	# basados en emoticones
-	#cur.execute("CREATE TABLE positive (date text, user text, user_id int, tweet_id int, text text)")
-	#cur.execute("CREATE TABLE negative (date text, user text, user_id int, tweet_id int, text text)")
+	with con:
+		try:
+			#cur.execute("DROP TABLE digitel")
+			#cur.execute("DROP TABLE movistar")
+			#cur.execute("DROP TABLE movilnet")
+			#cur.execute("CREATE TABLE digitel (date text, user text, user_id int, tweet_id int, text text)")
+			#cur.execute("CREATE TABLE movistar (date text, user text, user_id int, tweet_id int, text text)")
+			#cur.execute("CREATE TABLE movilnet (date text, user text, user_id int, tweet_id int, text text)")
+			#cur.execute("CREATE TABLE random (date text, user text, user_id int, tweet_id int, text text)")
+			cur.execute("CREATE TABLE positivo (date text, user text, user_id int, tweet_id int, text text)")
+			cur.execute("CREATE TABLE negativo (date text, user text, user_id int, tweet_id int, text text)")
+
+
+		except:
+			print "error creando tablas"
+			exit(-1);
 
 
 def insert_tweet(tweet, table_name): 
+	print tweet.text.encode('utf-8')
 	date = tweet.created_at
 	user = tweet.from_user
 	user_id = tweet.from_user_id_str
 	tweet_id = tweet.id_str
-	text = tweet.text.encode('utf-8')
+	text = tweet.text
+	query = "INSERT INTO "+ table_name + " VALUES(?, ?, ?, ?, ?)"
 	with con: 
 		try:
-			query = "INSERT INTO "+ table_name + " VALUES(?, ?, ?, ?, ?, ?)"
-			cur.execute(query, (date, user, user_id, tweet_id, text))
-		except:
+			cur.execute(query, (date, user, int(user_id), int(tweet_id), text))
+		except sqlite3.Error as e:
+			print e
 			return
+			#print "TWEET NO INGRESADO"
+			#exit(-1)
 
 
 def extract(query, table_name):
-	lat = 6.42375
-	lon = -66.58973
-	rad = '1mi'
+	lat = 10.50
+	lon = -66.90
+	rad = '4mi'
 	ven_code = '%s,%s,%s' % (lat, lon, rad)
 	page = 1
 	prev_maxid = 0
@@ -58,7 +67,7 @@ def extract(query, table_name):
 			if retrieved:
 				for tweet in retrieved:
 					insert_tweet(tweet, table_name)
-				maxid = tweet.id_str()
+				maxid = tweet.id_str
 				prev_maxid = maxid
 			else:
 				# all done
@@ -69,9 +78,11 @@ def extract(query, table_name):
 
 
 def create_dataset():
-	extract("digitel", "digitel")
-	extract("movistar", "movistar")
-	extract("movilnet", "movilnet")
+	extract(":-) OR :) OR =) OR :D OR =D", "positivo")
+	extract(":-( OR :( OR =( OR :C", "negativo")
+	#extract("digitel", "digitel")
+	#extract("movistar", "movistar")
+	#extract("movilnet", "movilnet")
 
 
 def main():
