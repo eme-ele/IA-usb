@@ -1,5 +1,8 @@
 import sys
 import re
+from sets import Set
+from nltk import SnowballStemmer
+
 
 '''
 CARACTERISTICAS POLARES
@@ -17,37 +20,44 @@ numero de hashtags
 numero de URLs
 numero de signos de puntuacion
 '''
-positivas_list = []
-negativas_list = []
-pos_emoticons_list = []
-neg_emoticons_list = []
-
+stemmer = SnowballStemmer("spanish")
 
 def numero_palabras_positivas(tweet):
 	res = 0
-	for e in positivas_list:
-		if tweet.find(e) != -1:
+	twt = tweet.split()
+	for p in positivas_list:
+		print p
+	
+	for w in twt:
+		print stemmer.stem(unicode(w.strip(),'UTF-8')).encode("UTF-8")
+		if stemmer.stem(unicode(w.strip(),'UTF-8')).encode("UTF-8") in positivas_list:
+			
 			res += 1
+	print res
+	exit(-1)
 	return res
 	
 def numero_palabras_negativas(tweet):
 	res = 0
-	for e in negativas_list:
-		if tweet.find(e) != -1:
+	twt = tweet.split()
+	for w in twt:
+		if stemmer.stem(unicode(w.strip(),'UTF-8')).encode("UTF-8") in negativas_list:
 			res += 1
 	return res
 
 def numero_emoticons_positivos(tweet):
 	res = 0
-	for e in pos_emoticons_list:
-		if tweet.find(e) != -1:
+	twt = tweet.split()
+	for w in twt:
+		if stemmer.stem(unicode(w.strip(),'UTF-8')).encode("UTF-8") in pos_emoticons_list:
 			res += 1
 	return res
 
 def numero_emoticons_negativos(tweet):
 	res = 0
-	for e in neg_emoticons_list:
-		if tweet.find(e) != -1:
+	twt = tweet.split()
+	for w in twt:
+		if stemmer.stem(unicode(w.strip(),'UTF-8')).encode("UTF-8") in neg_emoticons_list:
 			res += 1
 	return res
 
@@ -89,7 +99,15 @@ def numero_puntuaciones(tweet):
 def feature_list(tweet):
 	return [numero_palabras_positivas(tweet),	numero_palabras_negativas(tweet),	numero_emoticons_positivos(tweet),	numero_emoticons_negativos(tweet),	numero_palabras_allCAP(tweet),	numero_enfazis(tweet),	numero_exclamacion(tweet),	proporcion_capitalizada(tweet),		numero_palabras(tweet),		numero_hashtags(tweet),		numero_urls(tweet),		numero_puntuaciones(tweet)]
 
-
+def read_lista_palabras(origen):
+	f = open(origen)
+	contenido = f.read()
+	lista = []
+	contenido = contenido.split(r'\s+')
+	for c in contenido:
+		lista.append(c.strip())
+	return Set(lista)
+	
 
 def read_archivo(origen, destino):
 	f = open(origen)
@@ -116,6 +134,10 @@ def read_archivo(origen, destino):
 	f.close()
 
 if __name__ == "__main__":
+	positivas_list = read_lista_palabras("data/stemm_positivas.data")
+	negativas_list = read_lista_palabras("data/stemm_negativas.data")
+	pos_emoticons_list = read_lista_palabras("data/emot_positivos.data")
+	neg_emoticons_list = read_lista_palabras("data/emot_negativos.data")
 	read_archivo(sys.argv[1],sys.argv[2])
 
 
