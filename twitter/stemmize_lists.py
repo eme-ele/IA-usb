@@ -20,7 +20,7 @@ def main():
 	stemmer = SnowballStemmer("spanish")
 
 	for word in lista:
-		output.write(stemmer.stem(word.strip())+"\n")
+		output.write(stemmer.stem(unicode(word.strip(),'UTF-8')).encode("UTF-8")+"\n")
 
 	lista.close()
 	output.close()
