@@ -1,6 +1,5 @@
 import sys
 import re
-from sets import Set
 from nltk import SnowballStemmer
 
 
@@ -21,45 +20,46 @@ numero de URLs
 numero de signos de puntuacion
 '''
 stemmer = SnowballStemmer("spanish")
-
 def numero_palabras_positivas(tweet):
 	res = 0
 	twt = tweet.split()
-	for p in positivas_list:
-		print p
-	
-	for w in twt:
-		print stemmer.stem(unicode(w.strip(),'UTF-8')).encode("UTF-8")
-		if stemmer.stem(unicode(w.strip(),'UTF-8')).encode("UTF-8") in positivas_list:
-			
-			res += 1
-	print res
-	exit(-1)
+	try:
+		stemmer = SnowballStemmer("spanish")
+		for w in twt:
+			if stemmer.stem(unicode(w.strip(),'UTF-8')).encode("UTF-8") in positivas_list:
+				res += 1
+	except:
+		pass
 	return res
 	
 def numero_palabras_negativas(tweet):
 	res = 0
 	twt = tweet.split()
-	for w in twt:
-		if stemmer.stem(unicode(w.strip(),'UTF-8')).encode("UTF-8") in negativas_list:
-			res += 1
+	try:
+		for w in twt:
+			if stemmer.stem(unicode(w.strip(),'UTF-8')).encode("UTF-8") in negativas_list:
+				res += 1
+	except:
+		pass
 	return res
 
 def numero_emoticons_positivos(tweet):
 	res = 0
 	twt = tweet.split()
 	for w in twt:
-		if stemmer.stem(unicode(w.strip(),'UTF-8')).encode("UTF-8") in pos_emoticons_list:
-			res += 1
-	return res
+		for p in pos_emoticons_list:
+			if w == p:
+				res += 1
+	return 0
 
 def numero_emoticons_negativos(tweet):
 	res = 0
 	twt = tweet.split()
 	for w in twt:
-		if stemmer.stem(unicode(w.strip(),'UTF-8')).encode("UTF-8") in neg_emoticons_list:
-			res += 1
-	return res
+		for p in neg_emoticons_list:
+			if w == p:
+				res += 1
+	return 0
 
 def numero_palabras_allCAP(tweet):
 	all_cap_form = re.compile(r'\b[A-Z]+\b')
@@ -100,13 +100,11 @@ def feature_list(tweet):
 	return [numero_palabras_positivas(tweet),	numero_palabras_negativas(tweet),	numero_emoticons_positivos(tweet),	numero_emoticons_negativos(tweet),	numero_palabras_allCAP(tweet),	numero_enfazis(tweet),	numero_exclamacion(tweet),	proporcion_capitalizada(tweet),		numero_palabras(tweet),		numero_hashtags(tweet),		numero_urls(tweet),		numero_puntuaciones(tweet)]
 
 def read_lista_palabras(origen):
-	f = open(origen)
-	contenido = f.read()
 	lista = []
-	contenido = contenido.split(r'\s+')
-	for c in contenido:
-		lista.append(c.strip())
-	return Set(lista)
+	f = open(origen)
+	for l in f:
+		lista.append(l.strip())
+	return set(lista)
 	
 
 def read_archivo(origen, destino):
