@@ -1,12 +1,14 @@
 IA-usb
 ======
 
-Inteligencia Artificial II
+Repository for specialization courses on Artificial Intelligence, Simon Bolivar University.
 
- * p1: implementacion en C++ de un perceptron simple y una neurona adaline
+IA II (Machine Learning)
+
+ * p1: C++ implementation of a Single Layer Perceptron and ADALINE (Adaptive Linear Neuron)
 	
- * p2: implementacion en python de backpropagation en una red multicapa
+ * p2: Python implementation of backpropagation in a Multilayer Network
 
- * p3: implementacion en python del algoritmo genetico GABIL
+ * p3: Python implementation of GABIL genetic algorithm
 
- * twitter: proyecto de sentiment analysis en Twitter
+ * twitter: Supervised Learning (SVM) for Sentiment Analysis on Twitter, concering domestic products. (Spanish, Venezuela)
